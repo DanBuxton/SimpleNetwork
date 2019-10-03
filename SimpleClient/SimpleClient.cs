@@ -15,18 +15,13 @@ namespace SimpleClient
         private StreamWriter writer;
         private StreamReader reader;
 
-        public SimpleClient()
-        {
-
-        }
-
         public bool Connect(string ipAddress, int port)
         {
             bool result = true;
 
             try
             {
-                tcpClient.ConnectAsync(ipAddress, port);
+                tcpClient.Connect(ipAddress, port);
 
                 stream = tcpClient.GetStream();
 
@@ -37,8 +32,6 @@ namespace SimpleClient
             {
                 Console.WriteLine($"Exception: {e.Message}");
 
-                tcpClient.Close();
-
                 result = false;
             }
 
@@ -48,19 +41,23 @@ namespace SimpleClient
         public void Run()
         {
             string userInput;
+
             ProcessServerResponse();
 
-            while ((userInput = Console.ReadLine()) != null)
+            while ((userInput = Console.ReadLine()) != null && userInput.ToLower() != "exit")
             {
                 writer.WriteLine(userInput);
-
                 writer.Flush();
+
+                ProcessServerResponse();
             }
+
+            tcpClient.Close();
         }
 
         public void ProcessServerResponse()
         {
-            Console.WriteLine($"Server says: {reader.ReadLine()}\n");
+            Console.WriteLine($"Server says: {reader.ReadLine()}");
         }
     }
 }

@@ -12,9 +12,17 @@ namespace SimpleClient
         {
             SimpleClient sc = new SimpleClient();
 
-            Task.Run(() => sc.Connect("127.0.0.1", 4444));
+            //Task.Run(() => sc.Connect("127.0.0.1", 4444));
 
-
+            if (sc.Connect("127.0.0.1", 4444))
+            {
+                Console.WriteLine("Connected!");
+                sc.Run();
+            }
+            else
+            {
+                Console.WriteLine("Not Connected!");
+            }
         }
     }
 }
