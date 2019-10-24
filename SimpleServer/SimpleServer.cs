@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.IO;
 
@@ -12,6 +13,7 @@ namespace SimpleServer
     class SimpleServer
     {
         private TcpListener tcpListener { get; set; }
+        private List<Client> Clients { get; set; } = new List<Client>();
 
         public SimpleServer(string ipAddress, int port)
         {
@@ -24,11 +26,14 @@ namespace SimpleServer
 
             Console.WriteLine("Listening...");
 
-            Socket socket = tcpListener.AcceptSocket();
-            Console.WriteLine("Connection Made");
+            while (true)
+            {
+                Socket socket = tcpListener.AcceptSocket();
+                Console.WriteLine("Connection Made");
 
-            //Task.Run(()=> SocketMethod(socket));
-            SocketMethod(socket);
+                Thread t = new Thread(new ParameterizedThreadStart(ClientMethod));
+                t.Start(new Client(socket));
+            }
         }
 
         public void Stop()
@@ -36,25 +41,25 @@ namespace SimpleServer
             tcpListener.Stop();
         }
 
-        private void SocketMethod(Socket socket)
+        private void ClientMethod(object obj)
         {
+            Client c = (Client)obj;
+
+            Clients.Add(c);
+
             try
             {
                 string receivedMessage = "";
-                NetworkStream stream = new NetworkStream(socket, true);
 
-                StreamReader reader = new StreamReader(stream, Encoding.UTF8);
-                StreamWriter writer = new StreamWriter(stream, Encoding.UTF8);
-
-                writer.WriteLine("Welcome");
-                writer.Flush();
+                c.writer.WriteLine("Welcome");
+                c.writer.Flush();
 
                 while ((receivedMessage = Console.ReadLine()) != null && receivedMessage.ToLower() != "exit")
                 {
                     string msg = GetReturnMessage(receivedMessage);
 
-                    writer.WriteLine(msg);
-                    writer.Flush();
+                    c.writer.WriteLine(msg);
+                    c.writer.Flush();
                 }
             }
             catch (Exception e)
@@ -63,8 +68,11 @@ namespace SimpleServer
             }
             finally
             {
-                socket.Close();
+                Clients.Remove(c);
+                c.socket.Close();
             }
+
+            
         }
 
         private string GetReturnMessage(string code)

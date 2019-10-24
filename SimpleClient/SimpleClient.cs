@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace SimpleClient
 {
-    class SimpleClient
+    public class SimpleClient
     {
         private TcpClient tcpClient = new TcpClient();
         private NetworkStream stream;

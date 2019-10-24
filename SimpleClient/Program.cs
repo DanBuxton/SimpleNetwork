@@ -10,6 +10,8 @@ namespace SimpleClient
     {
         static void Main(string[] args)
         {
+            Console.Title = "Client";
+
             SimpleClient sc = new SimpleClient();
 
             //Task.Run(() => sc.Connect("127.0.0.1", 4444));
