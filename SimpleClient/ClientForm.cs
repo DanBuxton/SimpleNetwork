@@ -12,34 +12,51 @@ namespace SimpleClient
 {
     public partial class ClientForm : Form
     {
-        delegate void _UpdateChatWindowDelegate();
+        delegate void UpdateChatWindowDelegate(string message);
 
-        private SimpleClient client;
+        private UpdateChatWindowDelegate updateChatWindowDelegate;
+
+        private readonly SimpleClient client;
 
         public ClientForm(SimpleClient client)
         {
-            this.client = client;
-
             InitializeComponent();
+
+            updateChatWindowDelegate = new UpdateChatWindowDelegate(UpdateChatWindow);
+
+            this.client = client;
 
             txtInputMessage.Select();
 
             txtMessageDisplay.ReadOnly = true;
 
-            this.Load += (s, e) => client.Run();
-            //this.FormClosed += (s, e) => client.Stop();
+            Load += (s, e) => client.Run();
+            FormClosed += (s, e) => client.Stop();
 
-            btnSubmit.Click += BtnSubmit_Click;
+            btnSubmit.Click += (s, e) =>
+            {
+                string message = txtInputMessage.Text;
+                if (message.ToLower() != "exit")
+                {
+                    client.SendMessage(message);
+                    txtInputMessage.Clear();
+                }
+            };
         }
 
-        private void UpdateChatWindow()
+        public void UpdateChatWindow(string message)
         {
-
-        }
-
-        private void BtnSubmit_Click(object sender, EventArgs e)
-        {
-
+            if (txtMessageDisplay.InvokeRequired)
+            {
+                //btnSubmit?.Invoke(updateChatWindowDelegate, message);
+                txtMessageDisplay.Invoke(updateChatWindowDelegate, message);
+            }
+            else
+            {
+                txtMessageDisplay.Text += message;
+                txtMessageDisplay.SelectionStart = txtMessageDisplay.Text.Length;
+                txtMessageDisplay.ScrollToCaret();
+            }
         }
     }
 }

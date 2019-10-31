@@ -66,6 +66,8 @@
             this.Controls.Add(this.btnSubmit);
             this.Controls.Add(this.txtInputMessage);
             this.Controls.Add(this.txtMessageDisplay);
+            this.MaximumSize = new System.Drawing.Size(428, 331);
+            this.MinimumSize = new System.Drawing.Size(428, 331);
             this.Name = "ClientForm";
             this.Text = "SimpleClient";
             this.ResumeLayout(false);

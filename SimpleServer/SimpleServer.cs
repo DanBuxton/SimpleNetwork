@@ -12,7 +12,7 @@ namespace SimpleServer
 {
     class SimpleServer
     {
-        private TcpListener tcpListener { get; set; }
+        private readonly TcpListener tcpListener;
         private List<Client> Clients { get; set; } = new List<Client>();
 
         public SimpleServer(string ipAddress, int port)
@@ -54,9 +54,11 @@ namespace SimpleServer
                 c.writer.WriteLine("Welcome");
                 c.writer.Flush();
 
-                while ((receivedMessage = Console.ReadLine()) != null && receivedMessage.ToLower() != "exit")
+                while ((receivedMessage = c.reader.ReadLine()) != null && receivedMessage.ToLower() != "exit")
                 {
                     string msg = GetReturnMessage(receivedMessage);
+
+                    Console.WriteLine(msg);
 
                     c.writer.WriteLine(msg);
                     c.writer.Flush();
@@ -69,7 +71,7 @@ namespace SimpleServer
             finally
             {
                 Clients.Remove(c);
-                c.socket.Close();
+                c.Close();
             }
 
             

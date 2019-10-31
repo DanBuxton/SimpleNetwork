@@ -14,7 +14,6 @@ namespace SimpleServer
 
             server.Start();
             server.Stop();
-
         }
     }
 }

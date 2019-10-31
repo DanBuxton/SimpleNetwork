@@ -10,8 +10,8 @@ namespace SimpleServer
 {
     class Client
     {
-        public Socket socket { get; set; }
-        public NetworkStream stream { get; set; }
+        private Socket socket { get; set; }
+        private NetworkStream stream { get; set; }
         public StreamReader reader { get; private set; }
         public StreamWriter writer { get; private set; }
 

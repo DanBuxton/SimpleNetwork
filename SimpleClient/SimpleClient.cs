@@ -4,7 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace SimpleClient
 {
@@ -14,6 +16,13 @@ namespace SimpleClient
         private NetworkStream stream;
         private StreamWriter writer;
         private StreamReader reader;
+        private Thread readerThread;
+        private ClientForm messageForm;
+
+        public SimpleClient()
+        {
+            messageForm = new ClientForm(this);
+        }
 
         public bool Connect(string ipAddress, int port)
         {
@@ -35,29 +44,38 @@ namespace SimpleClient
                 result = false;
             }
 
+            readerThread = new Thread(new ThreadStart(ProcessServerResponse));
+
+            Application.Run(messageForm);
+
             return result;
         }
 
         public void Run()
         {
-            string userInput;
+            readerThread.Start();
+        }
 
-            ProcessServerResponse();
+        public void SendMessage(string message)
+        {
+            writer.WriteLine(message);
+            writer.Flush();
+        }
 
-            while ((userInput = Console.ReadLine()) != null && userInput.ToLower() != "exit")
-            {
-                writer.WriteLine(userInput);
-                writer.Flush();
-
-                ProcessServerResponse();
-            }
+        public void Stop()
+        {
+            readerThread.Abort();
 
             tcpClient.Close();
         }
 
         public void ProcessServerResponse()
         {
-            Console.WriteLine($"Server says: {reader.ReadLine()}");
+            while (true)
+            {
+
+                messageForm.UpdateChatWindow($"Server says: {reader.ReadLine()}\n\n");
+            }
         }
     }
 }
