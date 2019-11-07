@@ -15,6 +15,8 @@ namespace SimpleServer
         private readonly TcpListener tcpListener;
         private List<Client> Clients { get; set; } = new List<Client>();
 
+        protected List<string> Nicknames { get; set; } = new List<string>();
+
         public SimpleServer(string ipAddress, int port)
         {
             tcpListener = new TcpListener(IPAddress.Parse(ipAddress), port);
@@ -29,7 +31,6 @@ namespace SimpleServer
             while (true)
             {
                 Socket socket = tcpListener.AcceptSocket();
-                Console.WriteLine("Connection Made");
 
                 Thread t = new Thread(new ParameterizedThreadStart(ClientMethod));
                 t.Start(new Client(socket));
@@ -47,21 +48,26 @@ namespace SimpleServer
 
             Clients.Add(c);
 
+            Console.WriteLine("Connection Made");
+
             try
             {
                 string receivedMessage = "";
 
-                c.writer.WriteLine("Welcome");
-                c.writer.Flush();
+                c.Writer.WriteLine("Welcome");
+                c.Writer.Flush();
 
-                while ((receivedMessage = c.reader.ReadLine()) != null && receivedMessage.ToLower() != "exit")
+                while ((receivedMessage = c.Reader.ReadLine()) != null && receivedMessage.ToLower() != "exit")
                 {
                     string msg = GetReturnMessage(receivedMessage);
 
                     Console.WriteLine(msg);
 
-                    c.writer.WriteLine(msg);
-                    c.writer.Flush();
+                    Clients.ForEach((cl) =>
+                    {
+                        cl.Writer.WriteLine(msg);
+                        cl.Writer.Flush();
+                    });
                 }
             }
             catch (Exception e)
@@ -71,10 +77,11 @@ namespace SimpleServer
             finally
             {
                 Clients.Remove(c);
+
+                Console.WriteLine("Client Disconnected");
+
                 c.Close();
             }
-
-            
         }
 
         private string GetReturnMessage(string code)

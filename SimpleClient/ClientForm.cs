@@ -14,17 +14,17 @@ namespace SimpleClient
     {
         delegate void UpdateChatWindowDelegate(string message);
 
-        private UpdateChatWindowDelegate updateChatWindowDelegate;
+        private readonly UpdateChatWindowDelegate updateChatWindowDelegate;
 
         private readonly SimpleClient client;
 
-        public ClientForm(SimpleClient client)
+        public ClientForm(SimpleClient c)
         {
             InitializeComponent();
 
             updateChatWindowDelegate = new UpdateChatWindowDelegate(UpdateChatWindow);
 
-            this.client = client;
+            client = c;
 
             txtInputMessage.Select();
 
@@ -41,6 +41,7 @@ namespace SimpleClient
                     client.SendMessage(message);
                     txtInputMessage.Clear();
                 }
+                else client.Stop();
             };
         }
 

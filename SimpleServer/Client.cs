@@ -10,26 +10,26 @@ namespace SimpleServer
 {
     class Client
     {
-        private Socket socket { get; set; }
-        private NetworkStream stream { get; set; }
-        public StreamReader reader { get; private set; }
-        public StreamWriter writer { get; private set; }
+        private Socket Socket { get; set; }
+        private NetworkStream Stream { get; set; }
+        public StreamReader Reader { get; private set; }
+        public StreamWriter Writer { get; private set; }
 
         public Client(Socket socket)
         {
             Console.Title = "Server";
 
-            this.socket = socket;
+            this.Socket = socket;
 
-            stream = new NetworkStream(socket, true);
+            Stream = new NetworkStream(socket, true);
 
-            reader = new StreamReader(stream, Encoding.UTF8);
-            writer = new StreamWriter(stream, Encoding.UTF8);
+            Reader = new StreamReader(Stream, Encoding.UTF8);
+            Writer = new StreamWriter(Stream, Encoding.UTF8);
         }
 
         public void Close()
         {
-            socket.Close();
+            Socket.Close();
         }
     }
 }

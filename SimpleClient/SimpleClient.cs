@@ -12,12 +12,13 @@ namespace SimpleClient
 {
     public class SimpleClient
     {
-        private TcpClient tcpClient = new TcpClient();
+        private readonly TcpClient tcpClient = new TcpClient();
         private NetworkStream stream;
         private StreamWriter writer;
         private StreamReader reader;
         private Thread readerThread;
-        private ClientForm messageForm;
+        private readonly ClientForm messageForm;
+        private readonly NicknameForm nicknameForm = new NicknameForm();
 
         public SimpleClient()
         {
@@ -45,6 +46,10 @@ namespace SimpleClient
             }
 
             readerThread = new Thread(new ThreadStart(ProcessServerResponse));
+
+            // Set nickname
+            Application.Run(nicknameForm);
+            string nickname = nicknameForm.Name;
 
             Application.Run(messageForm);
 
@@ -74,7 +79,7 @@ namespace SimpleClient
             while (true)
             {
 
-                messageForm.UpdateChatWindow($"Server says: {reader.ReadLine()}\n\n");
+                messageForm.UpdateChatWindow($"{reader.ReadLine()}\n");
             }
         }
     }
