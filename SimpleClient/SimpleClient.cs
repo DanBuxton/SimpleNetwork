@@ -78,7 +78,6 @@ namespace SimpleClient
         {
             while (true)
             {
-
                 messageForm.UpdateChatWindow($"{reader.ReadLine()}\n");
             }
         }

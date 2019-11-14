@@ -59,7 +59,7 @@ namespace SimpleServer
 
                 while ((receivedMessage = c.Reader.ReadLine()) != null && receivedMessage.ToLower() != "exit")
                 {
-                    string msg = GetReturnMessage(receivedMessage);
+                    string msg = receivedMessage;
 
                     Console.WriteLine(msg);
 
@@ -82,11 +82,6 @@ namespace SimpleServer
 
                 c.Close();
             }
-        }
-
-        private string GetReturnMessage(string code)
-        {
-            return code;
         }
     }
 }

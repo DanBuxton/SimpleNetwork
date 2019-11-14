@@ -46,7 +46,7 @@
             this.btnSubmit.Name = "btnSubmit";
             this.btnSubmit.Size = new System.Drawing.Size(75, 23);
             this.btnSubmit.TabIndex = 1;
-            this.btnSubmit.Text = "button1";
+            this.btnSubmit.Text = "Set";
             this.btnSubmit.UseVisualStyleBackColor = true;
             // 
             // label1

@@ -18,6 +18,8 @@ namespace SimpleClient
 
         private readonly SimpleClient client;
 
+        private readonly NicknameForm nicknameForm = new NicknameForm();
+
         public ClientForm(SimpleClient c)
         {
             InitializeComponent();
@@ -42,6 +44,16 @@ namespace SimpleClient
                     txtInputMessage.Clear();
                 }
                 else client.Stop();
+            };
+
+            btnNickname.Click += (s, e) =>
+            {
+                client.SendMessage("Name: " + nicknameForm.Name);
+            };
+
+            btnMessagePerson.Click += (s, e) =>
+            {
+
             };
         }
 

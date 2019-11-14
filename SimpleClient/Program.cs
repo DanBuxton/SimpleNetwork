@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace SimpleClient
 {
@@ -10,13 +12,11 @@ namespace SimpleClient
     {
         static void Main(string[] args)
         {
-            Console.Title = "Client";
-
-            SimpleClient sc = new SimpleClient();
-
             //Task.Run(() => sc.Connect("127.0.0.1", 4444));
 
-            sc.Connect("127.0.0.1", 4444);
+            new SimpleClient().Connect("127.0.0.1", 4444);
+
+            //new SimpleClient().Run();
         }
     }
 }
