@@ -33,7 +33,19 @@ namespace SimpleClient
             txtMessageDisplay.ReadOnly = true;
 
             Load += (s, e) => client.Run();
-            FormClosed += (s, e) => client.Stop();
+            FormClosed += (s, e) =>
+            {
+            };
+            btnDisconnect.Click += (s, e) =>
+            {
+                client.Stop();
+            };
+
+            // Connect to server
+            btnConnect.Click += (s, e) =>
+            {
+                client.Connect("127.0.0.1", 4444);
+            };
 
             btnSubmit.Click += (s, e) =>
             {

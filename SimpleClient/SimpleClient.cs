@@ -1,8 +1,10 @@
-﻿using System;
+﻿using Packets;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Sockets;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,11 +16,12 @@ namespace SimpleClient
     {
         private readonly TcpClient tcpClient = new TcpClient();
         private NetworkStream stream;
-        private StreamWriter writer;
-        private StreamReader reader;
+        private BinaryWriter writer;
+        private BinaryReader reader;
+        private readonly MemoryStream ms = new MemoryStream();
+        private readonly BinaryFormatter bf = new BinaryFormatter();
         private Thread readerThread;
         private readonly ClientForm messageForm;
-        private readonly NicknameForm nicknameForm = new NicknameForm();
 
         public SimpleClient()
         {
@@ -35,8 +38,8 @@ namespace SimpleClient
 
                 stream = tcpClient.GetStream();
 
-                writer = new StreamWriter(stream, Encoding.UTF8);
-                reader = new StreamReader(stream, Encoding.UTF8);
+                writer = new BinaryWriter(stream, Encoding.UTF8);
+                reader = new BinaryReader(stream, Encoding.UTF8);
             }
             catch (Exception e)
             {
@@ -47,12 +50,6 @@ namespace SimpleClient
 
             readerThread = new Thread(new ThreadStart(ProcessServerResponse));
 
-            // Set nickname
-            Application.Run(nicknameForm);
-            string nickname = nicknameForm.Name;
-
-            Application.Run(messageForm);
-
             return result;
         }
 
@@ -61,11 +58,17 @@ namespace SimpleClient
             readerThread.Start();
         }
 
-        public void SendMessage(string message)
+        public void Send(Packet data)
         {
-            writer.WriteLine(message);
+            bf.Serialize(ms, data);
+            byte[] buffer = ms.GetBuffer();
+
+            writer.Write(buffer.Length);
+            writer.Write(buffer);
             writer.Flush();
         }
+
+        public void SendMessage(string message) => Send(new ChatMessagePacket(message));
 
         public void Stop()
         {
@@ -78,7 +81,7 @@ namespace SimpleClient
         {
             while (true)
             {
-                messageForm.UpdateChatWindow($"{reader.ReadLine()}\n");
+                messageForm.UpdateChatWindow($"{reader.Read()}\n");
             }
         }
     }

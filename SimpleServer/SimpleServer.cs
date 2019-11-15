@@ -7,30 +7,32 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.IO;
+using Packets;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace SimpleServer
 {
     class SimpleServer
     {
-        private readonly TcpListener tcpListener;
-        private List<Client> Clients { get; set; } = new List<Client>();
+        private TcpListener TCPListener { get; set; }
 
+        private List<Client> Clients { get; set; } = new List<Client>();
         protected List<string> Nicknames { get; set; } = new List<string>();
 
         public SimpleServer(string ipAddress, int port)
         {
-            tcpListener = new TcpListener(IPAddress.Parse(ipAddress), port);
+            TCPListener = new TcpListener(IPAddress.Parse(ipAddress), port);
         }
 
         public void Start()
         {
-            tcpListener.Start();
+            TCPListener.Start();
 
             Console.WriteLine("Listening...");
 
             while (true)
             {
-                Socket socket = tcpListener.AcceptSocket();
+                Socket socket = TCPListener.AcceptSocket();
 
                 Thread t = new Thread(new ParameterizedThreadStart(ClientMethod));
                 t.Start(new Client(socket));
@@ -39,7 +41,12 @@ namespace SimpleServer
 
         public void Stop()
         {
-            tcpListener.Stop();
+            TCPListener.Stop();
+        }
+
+        public void Send(Packet data)
+        {
+
         }
 
         private void ClientMethod(object obj)
@@ -52,21 +59,26 @@ namespace SimpleServer
 
             try
             {
-                string receivedMessage = "";
+                int noOfIncomingBytes;
 
-                c.Writer.WriteLine("Welcome");
+                c.Bf.Serialize(c.Ms, new ChatMessagePacket("Welcome"));
+                byte[] buffer = c.Ms.GetBuffer();
+
+                c.Writer.Write(buffer.Length);
+                c.Writer.Write(buffer);
                 c.Writer.Flush();
 
-                while ((receivedMessage = c.Reader.ReadLine()) != null && receivedMessage.ToLower() != "exit")
+                Send(new ChatMessagePacket("Welcome"));
+
+                while ((noOfIncomingBytes = c.Reader.ReadInt32()) != 0)
                 {
-                    string msg = receivedMessage;
+                    string msg = (c.Bf.Deserialize(new MemoryStream(c.Reader.ReadBytes(noOfIncomingBytes))) as ChatMessagePacket).Message;
 
                     Console.WriteLine(msg);
 
                     Clients.ForEach((cl) =>
                     {
-                        cl.Writer.WriteLine(msg);
-                        cl.Writer.Flush();
+                        Send(new ChatMessagePacket(msg));
                     });
                 }
             }
@@ -80,8 +92,18 @@ namespace SimpleServer
 
                 Console.WriteLine("Client Disconnected");
 
+                Clients.ForEach((cl) =>
+                {
+                    Send(new ChatMessagePacket("Client Disconnected"));
+                });
+
                 c.Close();
             }
+        }
+
+        private string ProcessResponse(Packet data)
+        {
+            return "";
         }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Sockets;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,19 +13,22 @@ namespace SimpleServer
     {
         private Socket Socket { get; set; }
         private NetworkStream Stream { get; set; }
-        public StreamReader Reader { get; private set; }
-        public StreamWriter Writer { get; private set; }
+        public BinaryReader Reader { get; private set; }
+        public BinaryWriter Writer { get; private set; }
+
+        public MemoryStream Ms { get; private set; } = new MemoryStream();
+        public BinaryFormatter Bf { get; private set; } = new BinaryFormatter();
 
         public Client(Socket socket)
         {
             Console.Title = "Server";
 
-            this.Socket = socket;
+            Socket = socket;
 
             Stream = new NetworkStream(socket, true);
 
-            Reader = new StreamReader(Stream, Encoding.UTF8);
-            Writer = new StreamWriter(Stream, Encoding.UTF8);
+            Reader = new BinaryReader(Stream, Encoding.UTF8);
+            Writer = new BinaryWriter(Stream, Encoding.UTF8);
         }
 
         public void Close()
