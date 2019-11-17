@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
@@ -12,9 +13,11 @@ namespace SimpleClient
 {
     public partial class ClientForm : Form
     {
+        public ObservableCollection<string> ClientNames { get; set; } = new ObservableCollection<string> { "Dan B", "Rachel" };
+
         delegate void UpdateChatWindowDelegate(string message);
 
-        private readonly UpdateChatWindowDelegate updateChatWindowDelegate;
+        private UpdateChatWindowDelegate updateChatWindowDelegate;
 
         private readonly SimpleClient client;
 
@@ -24,48 +27,85 @@ namespace SimpleClient
         {
             InitializeComponent();
 
-            updateChatWindowDelegate = new UpdateChatWindowDelegate(UpdateChatWindow);
-
             client = c;
 
             txtInputMessage.Select();
 
             txtMessageDisplay.ReadOnly = true;
 
-            Load += (s, e) => client.Run();
+            cbClients.DataSource = ClientNames;
+
+            btnDisconnect.Enabled = false;
+            btnMessagePerson.Enabled = false;
+            btnNickname.Enabled = false;
+            btnRefreshList.Enabled = false;
+
             FormClosed += (s, e) =>
-            {
-            };
-            btnDisconnect.Click += (s, e) =>
             {
                 client.Stop();
             };
-
             // Connect to server
             btnConnect.Click += (s, e) =>
             {
                 client.Connect("127.0.0.1", 4444);
+                client.Run();
+                updateChatWindowDelegate = new UpdateChatWindowDelegate(UpdateChatWindow);
+                btnConnect.Enabled = false;
+                btnDisconnect.Enabled = true;
+                btnMessagePerson.Enabled = true;
+                btnNickname.Enabled = true;
+                btnRefreshList.Enabled = true;
+            };
+            btnDisconnect.Click += (s, e) =>
+            {
+                client.Stop();
+
+                btnConnect.Enabled = true;
+                btnDisconnect.Enabled = false;
+                btnMessagePerson.Enabled = false;
+                btnNickname.Enabled = false;
+                btnRefreshList.Enabled = false;
+
             };
 
             btnSubmit.Click += (s, e) =>
             {
                 string message = txtInputMessage.Text;
-                if (message.ToLower() != "exit")
+                if (string.IsNullOrWhiteSpace(message)) return; // No message
+                else if (message.Contains('@')) // Direct message
+                {
+                    int space = message.IndexOf(' ');
+
+                }
+                else if (message.ToLower() != "exit") // Normal message
                 {
                     client.SendMessage(message);
                     txtInputMessage.Clear();
+
+                    updateChatWindowDelegate = new UpdateChatWindowDelegate(UpdateChatWindow);
                 }
-                else client.Stop();
+                else client.Stop(); // Exit
             };
 
             btnNickname.Click += (s, e) =>
             {
-                client.SendMessage("Name: " + nicknameForm.Name);
+                Visible = false;
+                if (nicknameForm.ShowDialog() == DialogResult.OK)
+                {
+                    client.SendNickname(nicknameForm.Name);
+                    btnNickname.Enabled = false;
+                }
+                Visible = true;
             };
+
+            //btnRefreshList.Click += (s, e) => client.Stop();
 
             btnMessagePerson.Click += (s, e) =>
             {
+                if (cbClients.SelectedItem != null)
+                {
 
+                }
             };
         }
 

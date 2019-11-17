@@ -16,8 +16,10 @@ namespace SimpleServer
         public BinaryReader Reader { get; private set; }
         public BinaryWriter Writer { get; private set; }
 
-        public MemoryStream Ms { get; private set; } = new MemoryStream();
+        public MemoryStream Ms { get; set; } = new MemoryStream();
         public BinaryFormatter Bf { get; private set; } = new BinaryFormatter();
+
+        public string Nickname { get; set; } = string.Empty;
 
         public Client(Socket socket)
         {

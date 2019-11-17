@@ -44,9 +44,30 @@ namespace SimpleServer
             TCPListener.Stop();
         }
 
-        public void Send(Packet data)
+        public void Send(Packet data, Client to = null)
         {
 
+            if (to == null)
+                Clients.ForEach((c) =>
+                {
+                    c.Ms = new MemoryStream();
+                    c.Bf.Serialize(c.Ms, data);
+                    byte[] buffer = c.Ms.GetBuffer();
+
+                    c.Writer.Write(buffer.Length);
+                    c.Writer.Write(buffer);
+                    c.Writer.Flush();
+                });
+            else
+            {
+                to.Ms = new MemoryStream();
+                to.Bf.Serialize(to.Ms, data);
+                byte[] buffer = to.Ms.GetBuffer();
+
+                to.Writer.Write(buffer.Length);
+                to.Writer.Write(buffer);
+                to.Writer.Flush();
+            }
         }
 
         private void ClientMethod(object obj)
@@ -61,49 +82,54 @@ namespace SimpleServer
             {
                 int noOfIncomingBytes;
 
-                c.Bf.Serialize(c.Ms, new ChatMessagePacket("Welcome"));
-                byte[] buffer = c.Ms.GetBuffer();
-
-                c.Writer.Write(buffer.Length);
-                c.Writer.Write(buffer);
-                c.Writer.Flush();
-
-                Send(new ChatMessagePacket("Welcome"));
+                Send(new ChatMessagePacket("Welcome"), c);
 
                 while ((noOfIncomingBytes = c.Reader.ReadInt32()) != 0)
                 {
-                    string msg = (c.Bf.Deserialize(new MemoryStream(c.Reader.ReadBytes(noOfIncomingBytes))) as ChatMessagePacket).Message;
-
-                    Console.WriteLine(msg);
-
-                    Clients.ForEach((cl) =>
-                    {
-                        Send(new ChatMessagePacket(msg));
-                    });
+                    ProcessResponse(c.Bf.Deserialize(new MemoryStream(c.Reader.ReadBytes(noOfIncomingBytes))) as Packet, c);
                 }
             }
-            catch (Exception e)
-            {
-                Console.WriteLine($"Error: {e.Message}");
-            }
+            catch (Exception) { }
             finally
             {
                 Clients.Remove(c);
 
                 Console.WriteLine("Client Disconnected");
 
-                Clients.ForEach((cl) =>
-                {
-                    Send(new ChatMessagePacket("Client Disconnected"));
-                });
+                Send(new ChatMessagePacket("Client Disconnected"));
 
                 c.Close();
             }
         }
 
-        private string ProcessResponse(Packet data)
+        private void ProcessResponse(Packet data, Client c)
         {
-            return "";
+            switch (data.Type)
+            {
+                case PacketType.EMPTY:
+                    break;
+                case PacketType.NICKNAME:
+                    c.Nickname = (data as NicknamePacket).Name;
+                    Nicknames.Add(c.Nickname);
+                    Console.WriteLine("Nickname set: {0}", c.Nickname);
+                    break;
+                case PacketType.DIRECTMESSAGE:
+                    // To specific person
+                    break;
+                case PacketType.CHATMESSAGE:
+                    string msg = (c.Nickname != string.Empty ? c.Nickname : c.GetHashCode().ToString()) + ": " + (data as ChatMessagePacket).Message;
+                    Console.WriteLine(msg);
+
+                    Send(new ChatMessagePacket(msg));
+                    break;
+                case PacketType.CLIENTLIST:
+
+                    break;
+                case PacketType.ENDPOINT:
+                    break;
+                default:
+                    break;
+            }
         }
     }
 }

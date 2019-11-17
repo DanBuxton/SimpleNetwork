@@ -18,7 +18,7 @@ namespace SimpleClient
         private NetworkStream stream;
         private BinaryWriter writer;
         private BinaryReader reader;
-        private readonly MemoryStream ms = new MemoryStream();
+        private MemoryStream ms = new MemoryStream();
         private readonly BinaryFormatter bf = new BinaryFormatter();
         private Thread readerThread;
         private readonly ClientForm messageForm;
@@ -26,15 +26,17 @@ namespace SimpleClient
         public SimpleClient()
         {
             messageForm = new ClientForm(this);
+
+            Application.Run(messageForm);
         }
 
-        public bool Connect(string ipAddress, int port)
+        public bool Connect(string hostname, int port)
         {
             bool result = true;
 
             try
             {
-                tcpClient.Connect(ipAddress, port);
+                tcpClient.Connect(hostname, port);
 
                 stream = tcpClient.GetStream();
 
@@ -60,6 +62,7 @@ namespace SimpleClient
 
         public void Send(Packet data)
         {
+            ms = new MemoryStream();
             bf.Serialize(ms, data);
             byte[] buffer = ms.GetBuffer();
 
@@ -69,10 +72,15 @@ namespace SimpleClient
         }
 
         public void SendMessage(string message) => Send(new ChatMessagePacket(message));
+        public void SendNickname(string name) => Send(new NicknamePacket(name));
 
         public void Stop()
         {
-            readerThread.Abort();
+            try
+            {
+                readerThread.Abort();
+            }
+            catch (Exception) { }
 
             tcpClient.Close();
         }
@@ -81,7 +89,30 @@ namespace SimpleClient
         {
             while (true)
             {
-                messageForm.UpdateChatWindow($"{reader.Read()}\n");
+                string msg = string.Empty;
+
+                ms = new MemoryStream(reader.ReadBytes(reader.ReadInt32()));
+                Packet p = bf.Deserialize(ms) as Packet;
+                switch (p.Type)
+                {
+                    case PacketType.EMPTY:
+                        break;
+                    case PacketType.NICKNAME:
+                        break;
+                    case PacketType.DIRECTMESSAGE:
+                    case PacketType.CHATMESSAGE:
+                        msg = ((ChatMessagePacket)p).Message;
+                        break;
+                    case PacketType.CLIENTLIST:
+                        break;
+                    case PacketType.ENDPOINT:
+                        break;
+                    default:
+                        break;
+                }
+
+                if (msg != string.Empty)
+                    messageForm.UpdateChatWindow($"{msg}\n");
             }
         }
     }

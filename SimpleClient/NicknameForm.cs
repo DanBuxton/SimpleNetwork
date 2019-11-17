@@ -12,7 +12,7 @@ namespace SimpleClient
 {
     public partial class NicknameForm : Form
     {
-        public new string Name { get; private set; }
+        public new string Name { get; private set; } = string.Empty;
 
         public NicknameForm()
         {
@@ -21,6 +21,7 @@ namespace SimpleClient
             btnSubmit.Click += (s, e) =>
             {
                 Name = txtNickname.Text;
+                DialogResult = DialogResult.OK;
             };
         }
     }

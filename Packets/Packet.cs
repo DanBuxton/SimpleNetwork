@@ -11,6 +11,7 @@ namespace Packets
     {
         EMPTY,
         NICKNAME,
+        DIRECTMESSAGE,
         CHATMESSAGE,
         CLIENTLIST,
         ENDPOINT
@@ -47,18 +48,28 @@ namespace Packets
     }
 
     [Serializable]
-    class ClientListPacket : Packet
+    public class ClientListPacket : Packet
     {
+        public List<string> Names { get; set; }
 
-
-        public ClientListPacket()
+        public ClientListPacket(params string[] names)
         {
             Type = PacketType.CLIENTLIST;
+            Names = names.ToList();
         }
     }
 
     [Serializable]
-    class LoginPacket : Packet
+    public class DirectMessagePacket : ChatMessagePacket
+    {
+        public DirectMessagePacket(string msg) : base(msg)
+        {
+            Type = PacketType.DIRECTMESSAGE;
+        }
+    }
+
+    [Serializable]
+    public class LoginPacket : Packet
     {
         public EndPoint EndPoint { get; set; }
 
