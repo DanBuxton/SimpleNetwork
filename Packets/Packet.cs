@@ -50,33 +50,40 @@ namespace Packets
     [Serializable]
     public class ClientListPacket : Packet
     {
-        public List<string> Names { get; set; }
+        public List<string> Names { get; private set; }
 
         public ClientListPacket(params string[] names)
         {
             Type = PacketType.CLIENTLIST;
             Names = names.ToList();
         }
+        public ClientListPacket(List<string> names)
+        {
+            Type = PacketType.CLIENTLIST;
+            Names = names;
+        }
     }
 
     [Serializable]
     public class DirectMessagePacket : ChatMessagePacket
     {
+        public string To { get; set; } = string.Empty;
+
         public DirectMessagePacket(string msg) : base(msg)
         {
             Type = PacketType.DIRECTMESSAGE;
         }
     }
 
-    [Serializable]
-    public class LoginPacket : Packet
-    {
-        public EndPoint EndPoint { get; set; }
+    //[Serializable]
+    //public class LoginPacket : Packet
+    //{
+    //    public EndPoint EndPoint { get; set; }
 
-        public LoginPacket(EndPoint endPoint)
-        {
-            Type = PacketType.ENDPOINT;
-            EndPoint = endPoint;
-        }
-    }
+    //    public LoginPacket(EndPoint endPoint)
+    //    {
+    //        Type = PacketType.ENDPOINT;
+    //        EndPoint = endPoint;
+    //    }
+    //}
 }
