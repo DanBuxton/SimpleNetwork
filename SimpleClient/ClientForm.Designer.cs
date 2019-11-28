@@ -37,8 +37,8 @@
             this.cbClients = new System.Windows.Forms.ComboBox();
             this.btnMessagePerson = new System.Windows.Forms.Button();
             this.btnRefreshList = new System.Windows.Forms.Button();
-            this.btnDraw = new System.Windows.Forms.Button();
             this.btnReset = new System.Windows.Forms.Button();
+            this.btnDraw = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // txtMessageDisplay
@@ -119,15 +119,6 @@
             this.btnRefreshList.Text = "Refresh List";
             this.btnRefreshList.UseVisualStyleBackColor = true;
             // 
-            // btnDraw
-            // 
-            this.btnDraw.Location = new System.Drawing.Point(439, 346);
-            this.btnDraw.Name = "btnDraw";
-            this.btnDraw.Size = new System.Drawing.Size(75, 23);
-            this.btnDraw.TabIndex = 9;
-            this.btnDraw.Text = "Draw";
-            this.btnDraw.UseVisualStyleBackColor = true;
-            // 
             // btnReset
             // 
             this.btnReset.Location = new System.Drawing.Point(520, 346);
@@ -137,11 +128,20 @@
             this.btnReset.Text = "Reset";
             this.btnReset.UseVisualStyleBackColor = true;
             // 
+            // btnDraw
+            // 
+            this.btnDraw.Location = new System.Drawing.Point(439, 346);
+            this.btnDraw.Name = "btnDraw";
+            this.btnDraw.Size = new System.Drawing.Size(75, 23);
+            this.btnDraw.TabIndex = 9;
+            this.btnDraw.Text = "Draw";
+            this.btnDraw.UseVisualStyleBackColor = true;
+            // 
             // ClientForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(637, 381);
+            this.ClientSize = new System.Drawing.Size(616, 381);
             this.Controls.Add(this.btnReset);
             this.Controls.Add(this.btnDraw);
             this.Controls.Add(this.btnRefreshList);
@@ -170,7 +170,7 @@
         private System.Windows.Forms.ComboBox cbClients;
         private System.Windows.Forms.Button btnMessagePerson;
         private System.Windows.Forms.Button btnRefreshList;
-        private System.Windows.Forms.Button btnDraw;
         private System.Windows.Forms.Button btnReset;
+        private System.Windows.Forms.Button btnDraw;
     }
 }

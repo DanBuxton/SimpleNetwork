@@ -13,7 +13,7 @@ namespace SimpleClient
 {
     public partial class ClientForm : Form
     {
-        public ObservableCollection<string> ClientNames { get; set; } = new ObservableCollection<string> { "Dan B", "Rachel" };
+        public List<string> ClientNames { get; set; } = new List<string>();
 
         delegate void UpdateChatWindowDelegate(string message);
 
@@ -47,9 +47,20 @@ namespace SimpleClient
             // Connect to server
             btnConnect.Click += (s, e) =>
             {
+
+
                 client.Connect("127.0.0.1", 4444);
                 client.Run();
                 updateChatWindowDelegate = new UpdateChatWindowDelegate(UpdateChatWindow);
+
+                Visible = false;
+                if (nicknameForm.ShowDialog() == DialogResult.OK)
+                {
+                    client.SendNickname(nicknameForm.Name);
+                    btnNickname.Enabled = false;
+                }
+                Visible = true;
+
                 btnConnect.Enabled = false;
                 btnDisconnect.Enabled = true;
                 btnMessagePerson.Enabled = true;
@@ -75,7 +86,8 @@ namespace SimpleClient
                 else if (message.Contains('@')) // Direct message
                 {
                     int space = message.IndexOf(' ');
-
+                    client.SendDirectMessage(message.Remove(0, 1).Remove(space, message.Length-1), message);
+                    updateChatWindowDelegate = new UpdateChatWindowDelegate(UpdateChatWindow);
                 }
                 else if (message.ToLower() != "exit") // Normal message
                 {

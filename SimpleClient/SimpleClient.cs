@@ -1,6 +1,7 @@
 ﻿using Packets;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Net.Sockets;
@@ -72,6 +73,7 @@ namespace SimpleClient
         }
 
         public void SendMessage(string message) => Send(new ChatMessagePacket(message));
+        public void SendDirectMessage(string to, string msg) => Send(new DirectMessagePacket(msg, to));
         public void SendNickname(string name) => Send(new NicknamePacket(name));
 
         public void Stop()
@@ -100,10 +102,14 @@ namespace SimpleClient
                     case PacketType.NICKNAME:
                         break;
                     case PacketType.DIRECTMESSAGE:
+                    //msg = ((DirectMessagePacket)p).Message;
+                    //break;
                     case PacketType.CHATMESSAGE:
                         msg = ((ChatMessagePacket)p).Message;
                         break;
                     case PacketType.CLIENTLIST:
+                        var list = (p as ClientListPacket).Names;
+                        messageForm.ClientNames.AddRange(list);
                         break;
                     case PacketType.ENDPOINT:
                         break;

@@ -46,7 +46,6 @@ namespace SimpleServer
 
         public void Send(Packet data, Client to = null)
         {
-
             if (to == null)
                 Clients.ForEach((c) =>
                 {
@@ -96,7 +95,7 @@ namespace SimpleServer
 
                 Console.WriteLine("Client Disconnected");
 
-                Send(new ChatMessagePacket("Client Disconnected"));
+                Send(new ChatMessagePacket(string.Format("Client {0} Disconnected", c.Nickname != string.Empty ? c.Nickname : c.GetHashCode().ToString())));
 
                 c.Close();
             }
@@ -104,6 +103,8 @@ namespace SimpleServer
 
         private void ProcessResponse(Packet data, Client c)
         {
+            string msg;
+
             switch (data.Type)
             {
                 case PacketType.EMPTY:
@@ -112,12 +113,27 @@ namespace SimpleServer
                     c.Nickname = (data as NicknamePacket).Name;
                     Nicknames.Add(c.Nickname);
                     Console.WriteLine("Nickname set: {0}", c.Nickname);
+
+                    foreach (var item in Clients)
+                    {
+                        Send(new ClientListPacket(Nicknames));
+                        Console.WriteLine("Client List sent");
+                    }
                     break;
                 case PacketType.DIRECTMESSAGE:
                     // To specific person
+                    var pack = data as DirectMessagePacket;
+                    Client client = null;
+                    foreach (Client c1 in Clients)
+                    {
+                        if (c1.Nickname.Equals(pack.To)) { client = c1; break; }
+                    }
+                    Console.WriteLine("Private message from {0} to {1}", c.Nickname != string.Empty ? c.Nickname : c.GetHashCode().ToString(), client.Nickname != string.Empty ? client.Nickname : client.GetHashCode().ToString());
+
+                    Send(data, client);
                     break;
                 case PacketType.CHATMESSAGE:
-                    string msg = (c.Nickname != string.Empty ? c.Nickname : c.GetHashCode().ToString()) + ": " + (data as ChatMessagePacket).Message;
+                    msg = (c.Nickname != string.Empty ? c.Nickname : c.GetHashCode().ToString()) + ": " + (data as ChatMessagePacket).Message;
                     Console.WriteLine(msg);
 
                     Send(new ChatMessagePacket(msg));

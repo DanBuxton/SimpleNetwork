@@ -69,8 +69,9 @@ namespace Packets
     {
         public string To { get; set; } = string.Empty;
 
-        public DirectMessagePacket(string msg) : base(msg)
+        public DirectMessagePacket(string msg, string to) : base(msg)
         {
+            To = to;
             Type = PacketType.DIRECTMESSAGE;
         }
     }
