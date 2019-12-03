@@ -111,7 +111,11 @@ namespace SimpleClient
                         var list = (p as ClientListPacket).Names;
                         messageForm.ClientNames.AddRange(list);
                         break;
-                    case PacketType.ENDPOINT:
+                    case PacketType.GAMECREATE:
+
+                        break;
+                    case PacketType.GAMEUPDATE:
+
                         break;
                     default:
                         break;

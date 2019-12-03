@@ -27,6 +27,8 @@ namespace SimpleClient
             btn7.Click += Btn_Click;
             btn8.Click += Btn_Click;
             btn9.Click += Btn_Click;
+
+
         }
 
         private void Btn_Click(object sender, EventArgs e)

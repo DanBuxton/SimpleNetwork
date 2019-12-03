@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace Packets
 {
@@ -14,7 +15,10 @@ namespace Packets
         DIRECTMESSAGE,
         CHATMESSAGE,
         CLIENTLIST,
-        ENDPOINT
+        ENDPOINT,
+        GAMECREATE,
+        GAMEUPDATE,
+        GAMEEND
     }
 
     [Serializable]
@@ -73,6 +77,30 @@ namespace Packets
         {
             To = to;
             Type = PacketType.DIRECTMESSAGE;
+        }
+    }
+
+    [Serializable]
+    public class GameUpdatePacket : Packet
+    {
+        public List<Button> Buttons { get; set; }
+
+        public GameUpdatePacket(List<Button> buttons)
+        {
+            Buttons = buttons;
+            Type = PacketType.GAMEUPDATE;
+        }
+    }
+
+    [Serializable]
+    public class GameCreatePacket : Packet
+    {
+        public string To { get; set; } = string.Empty;
+
+        public GameCreatePacket(string to)
+        {
+            To = to;
+            Type = PacketType.GAMECREATE;
         }
     }
 
