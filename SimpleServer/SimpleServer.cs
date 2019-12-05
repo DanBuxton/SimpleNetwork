@@ -95,7 +95,7 @@ namespace SimpleServer
 
                 Console.WriteLine("Client Disconnected");
 
-                Send(new ChatMessagePacket(string.Format("Client {0} Disconnected", c.Nickname != string.Empty ? c.Nickname : c.GetHashCode().ToString())));
+                Send(new ChatMessagePacket(string.Format("{0} Disconnected", c.Nickname != string.Empty ? c.Nickname : c.GetHashCode().ToString())));
 
                 c.Close();
             }
@@ -113,12 +113,7 @@ namespace SimpleServer
                     c.Nickname = (data as NicknamePacket).Name;
                     Nicknames.Add(c.Nickname);
                     Console.WriteLine("Nickname set: {0}", c.Nickname);
-
-                    foreach (var item in Clients)
-                    {
-                        Send(new ClientListPacket(Nicknames));
-                        Console.WriteLine("Client List sent");
-                    }
+                    SendClientList();
                     break;
                 case PacketType.DIRECTMESSAGE:
                     // To specific person
@@ -128,12 +123,12 @@ namespace SimpleServer
                     {
                         if (c1.Nickname.Equals(pack.To)) { client = c1; break; }
                     }
-                    Console.WriteLine("Private message from {0} to {1}", c.Nickname != string.Empty ? c.Nickname : c.GetHashCode().ToString(), client.Nickname != string.Empty ? client.Nickname : client.GetHashCode().ToString());
+                    Console.WriteLine("Private message sent to {1} from {0}", GetNickname(c), GetNickname(client));
 
                     Send(data, client);
                     break;
                 case PacketType.CHATMESSAGE:
-                    msg = (c.Nickname != string.Empty ? c.Nickname : c.GetHashCode().ToString()) + ": " + (data as ChatMessagePacket).Message;
+                    msg = GetNickname(c) + ": " + (data as ChatMessagePacket).Message;
                     Console.WriteLine(msg);
 
                     Send(new ChatMessagePacket(msg));
@@ -144,6 +139,24 @@ namespace SimpleServer
                 default:
                     break;
             }
+        }
+
+        private void SendClientList()
+        {
+            foreach (Client cl in Clients)
+            {
+                var namesNew = new List<string>(Nicknames);
+                if (namesNew.Remove(cl.Nickname))
+                {
+                    Send(new ClientListPacket(namesNew), cl);
+                    Console.WriteLine("Client List sent to: " + cl.Nickname);
+                }
+            }
+        }
+
+        public string GetNickname(Client c)
+        {
+            return c.Nickname != string.Empty ? c.Nickname : c.GetHashCode().ToString();
         }
     }
 }
