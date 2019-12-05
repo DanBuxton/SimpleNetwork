@@ -38,7 +38,8 @@
             this.btnMessagePerson = new System.Windows.Forms.Button();
             this.btnRefreshList = new System.Windows.Forms.Button();
             this.btnReset = new System.Windows.Forms.Button();
-            this.btnDraw = new System.Windows.Forms.Button();
+            this.picImage = new System.Windows.Forms.PictureBox();
+            ((System.ComponentModel.ISupportInitialize)(this.picImage)).BeginInit();
             this.SuspendLayout();
             // 
             // txtMessageDisplay
@@ -121,29 +122,28 @@
             // 
             // btnReset
             // 
-            this.btnReset.Location = new System.Drawing.Point(520, 346);
+            this.btnReset.Location = new System.Drawing.Point(565, 346);
             this.btnReset.Name = "btnReset";
             this.btnReset.Size = new System.Drawing.Size(75, 23);
             this.btnReset.TabIndex = 10;
             this.btnReset.Text = "Reset";
             this.btnReset.UseVisualStyleBackColor = true;
             // 
-            // btnDraw
+            // picImage
             // 
-            this.btnDraw.Location = new System.Drawing.Point(439, 346);
-            this.btnDraw.Name = "btnDraw";
-            this.btnDraw.Size = new System.Drawing.Size(75, 23);
-            this.btnDraw.TabIndex = 9;
-            this.btnDraw.Text = "Draw";
-            this.btnDraw.UseVisualStyleBackColor = true;
+            this.picImage.Location = new System.Drawing.Point(522, 143);
+            this.picImage.Name = "picImage";
+            this.picImage.Size = new System.Drawing.Size(100, 100);
+            this.picImage.TabIndex = 11;
+            this.picImage.TabStop = false;
             // 
             // ClientForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(616, 381);
+            this.ClientSize = new System.Drawing.Size(769, 381);
+            this.Controls.Add(this.picImage);
             this.Controls.Add(this.btnReset);
-            this.Controls.Add(this.btnDraw);
             this.Controls.Add(this.btnRefreshList);
             this.Controls.Add(this.btnMessagePerson);
             this.Controls.Add(this.cbClients);
@@ -155,6 +155,7 @@
             this.Controls.Add(this.txtMessageDisplay);
             this.Name = "ClientForm";
             this.Text = "SimpleClient";
+            ((System.ComponentModel.ISupportInitialize)(this.picImage)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -171,6 +172,6 @@
         private System.Windows.Forms.Button btnMessagePerson;
         private System.Windows.Forms.Button btnRefreshList;
         private System.Windows.Forms.Button btnReset;
-        private System.Windows.Forms.Button btnDraw;
+        private System.Windows.Forms.PictureBox picImage;
     }
 }

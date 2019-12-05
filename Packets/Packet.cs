@@ -15,10 +15,7 @@ namespace Packets
         DIRECTMESSAGE,
         CHATMESSAGE,
         CLIENTLIST,
-        ENDPOINT,
-        GAMECREATE,
-        GAMEUPDATE,
-        GAMEEND
+        //ENDPOINT
     }
 
     [Serializable]
@@ -77,30 +74,6 @@ namespace Packets
         {
             To = to;
             Type = PacketType.DIRECTMESSAGE;
-        }
-    }
-
-    [Serializable]
-    public class GameUpdatePacket : Packet
-    {
-        public List<Button> Buttons { get; set; }
-
-        public GameUpdatePacket(List<Button> buttons)
-        {
-            Buttons = buttons;
-            Type = PacketType.GAMEUPDATE;
-        }
-    }
-
-    [Serializable]
-    public class GameCreatePacket : Packet
-    {
-        public string To { get; set; } = string.Empty;
-
-        public GameCreatePacket(string to)
-        {
-            To = to;
-            Type = PacketType.GAMECREATE;
         }
     }
 

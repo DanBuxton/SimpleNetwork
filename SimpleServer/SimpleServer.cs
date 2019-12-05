@@ -141,12 +141,6 @@ namespace SimpleServer
                 case PacketType.CLIENTLIST:
 
                     break;
-                case PacketType.GAMECREATE:
-
-                    break;
-                case PacketType.GAMEUPDATE:
-
-                    break;
                 default:
                     break;
             }

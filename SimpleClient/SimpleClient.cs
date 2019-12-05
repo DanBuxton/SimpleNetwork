@@ -108,14 +108,7 @@ namespace SimpleClient
                         msg = ((ChatMessagePacket)p).Message;
                         break;
                     case PacketType.CLIENTLIST:
-                        var list = (p as ClientListPacket).Names;
-                        messageForm.ClientNames.AddRange(list);
-                        break;
-                    case PacketType.GAMECREATE:
-
-                        break;
-                    case PacketType.GAMEUPDATE:
-
+                        messageForm.UpdateClientList((p as ClientListPacket).Names);
                         break;
                     default:
                         break;

@@ -40,6 +40,8 @@ namespace SimpleClient
             btnNickname.Enabled = false;
             btnRefreshList.Enabled = false;
 
+            
+
             FormClosed += (s, e) =>
             {
                 client.Stop();
@@ -119,6 +121,11 @@ namespace SimpleClient
 
                 }
             };
+
+            btnRefreshList.Click += (s, e) =>
+            {
+
+            };
         }
 
         public void UpdateChatWindow(string message)
@@ -135,5 +142,7 @@ namespace SimpleClient
                 txtMessageDisplay.ScrollToCaret();
             }
         }
+
+        public void UpdateClientList(List<string> clients) => ClientNames = clients;
     }
 }
