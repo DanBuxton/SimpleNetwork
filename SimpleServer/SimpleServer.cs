@@ -118,12 +118,13 @@ namespace SimpleServer
                 case PacketType.DIRECTMESSAGE:
                     // To specific person
                     var pack = data as DirectMessagePacket;
+                    pack.From = GetNickname(c);
                     Client client = null;
                     foreach (Client c1 in Clients)
                     {
                         if (c1.Nickname.Equals(pack.To)) { client = c1; break; }
                     }
-                    Console.WriteLine("Private message sent to {1} from {0}", GetNickname(c), GetNickname(client));
+                    Console.WriteLine("Private message: {0} -> {1}", GetNickname(c), GetNickname(client));
 
                     Send(data, client);
                     break;
@@ -134,8 +135,6 @@ namespace SimpleServer
                     Send(new ChatMessagePacket(msg));
                     break;
                 case PacketType.CLIENTLIST:
-
-                    break;
                 default:
                     break;
             }

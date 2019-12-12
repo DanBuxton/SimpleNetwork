@@ -93,7 +93,7 @@ namespace SimpleClient
                     int space = message.IndexOf(' ');
                     //client.SendDirectMessage(message.Remove(0, 1).Remove(space, message.Length - 1), message);
                     var name = cbClients.SelectedItem as string;
-                    string msg = message.Remove(0, space);
+                    string msg = message.Remove(0, ++space);
                     client.SendDirectMessage(name, msg);
 
                     updateChatWindowDelegate = new UpdateChatWindowDelegate(UpdateChatWindow);

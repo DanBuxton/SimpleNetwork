@@ -102,8 +102,10 @@ namespace SimpleClient
                     case PacketType.NICKNAME:
                         break;
                     case PacketType.DIRECTMESSAGE:
-                    //msg = ((DirectMessagePacket)p).Message;
-                    //break;
+                        var pack = p as DirectMessagePacket;
+                        msg = pack.Message;
+                        msg = msg.Insert(0, "Private Message From: " + pack.From + "\n\t");
+                        break;
                     case PacketType.CHATMESSAGE:
                         msg = ((ChatMessagePacket)p).Message;
                         break;
