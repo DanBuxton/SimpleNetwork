@@ -28,7 +28,7 @@ namespace SimpleServer
         {
             TCPListener.Start();
 
-            Console.WriteLine("Listening...");
+            //Console.WriteLine("Listening...");
 
             while (true)
             {
@@ -69,6 +69,15 @@ namespace SimpleServer
             }
         }
 
+        private void SendToEveryoneBut(Packet data, Client c)
+        {
+            foreach (var cl in Clients)
+            {
+                if (c == cl) continue;
+                Send(data, cl);
+            }
+        }
+
         private void ClientMethod(object obj)
         {
             Client c = (Client)obj;
@@ -83,6 +92,8 @@ namespace SimpleServer
 
                 Send(new ChatMessagePacket("Welcome"), c);
 
+                SendToEveryoneBut(new ChatMessagePacket(string.Format("{0} Connected", GetNickname(c))), c);
+
                 while ((noOfIncomingBytes = c.Reader.ReadInt32()) != 0)
                 {
                     ProcessResponse(c.Bf.Deserialize(new MemoryStream(c.Reader.ReadBytes(noOfIncomingBytes))) as Packet, c);
@@ -95,7 +106,10 @@ namespace SimpleServer
 
                 Console.WriteLine("Client Disconnected");
 
-                Send(new ChatMessagePacket(string.Format("{0} Disconnected", c.Nickname != string.Empty ? c.Nickname : c.GetHashCode().ToString())));
+                Send(new ChatMessagePacket(string.Format("{0} Disconnected", GetNickname(c))));
+
+                Nicknames.Remove(GetNickname(c));
+                SendClientList();
 
                 c.Close();
             }

@@ -35,14 +35,10 @@ namespace SimpleClient
 
             txtMessageDisplay.ReadOnly = true;
 
-            //cbClients.DataSource = ClientNames;
-
             btnDisconnect.Enabled = false;
             btnMessagePerson.Enabled = false;
             btnNickname.Enabled = false;
             btnRefreshList.Enabled = false;
-
-
 
             FormClosed += (s, e) =>
             {
@@ -51,30 +47,31 @@ namespace SimpleClient
             // Connect to server
             btnConnect.Click += (s, e) =>
             {
-
-
-                client.Connect("127.0.0.1", 4444);
-                client.Run();
-                updateChatWindowDelegate = new UpdateChatWindowDelegate(UpdateChatWindow);
-                updateClientListDelegate = new UpdateClientListDelegate(UpdateClientList);
-
-                Visible = false;
-                if (nicknameForm.ShowDialog() == DialogResult.OK)
+                if (client.Connect("127.0.0.1", 4444))
                 {
-                    client.SendNickname(nicknameForm.Name);
-                    btnNickname.Enabled = false;
-                }
-                Visible = true;
+                    client.Run();
+                    updateChatWindowDelegate = new UpdateChatWindowDelegate(UpdateChatWindow);
+                    updateClientListDelegate = new UpdateClientListDelegate(UpdateClientList);
 
-                btnConnect.Enabled = false;
-                btnDisconnect.Enabled = true;
-                btnMessagePerson.Enabled = true;
-                btnNickname.Enabled = true;
-                btnRefreshList.Enabled = true;
+                    Visible = false;
+                    if (nicknameForm.ShowDialog() == DialogResult.OK)
+                    {
+                        client.SendNickname(nicknameForm.Name);
+                        btnNickname.Enabled = !btnNickname.Enabled;
+                    }
+                    Visible = true;
+
+                    btnConnect.Enabled = false;
+                    btnDisconnect.Enabled = true;
+                    btnMessagePerson.Enabled = true;
+                    btnRefreshList.Enabled = true;
+                }
             };
             btnDisconnect.Click += (s, e) =>
             {
                 client.Stop();
+
+                cbClients.Items.Clear();
 
                 btnConnect.Enabled = true;
                 btnDisconnect.Enabled = false;
@@ -133,6 +130,9 @@ namespace SimpleClient
             {
 
             };
+
+            //https://docs.microsoft.com/en-us/dotnet/api/system.windows.forms.picturebox?view=netframework-4.8
+            //https://docs.microsoft.com/en-us/dotnet/api/system.windows.forms.control.location?view=netframework-4.8
         }
 
         public void UpdateChatWindow(string message)
@@ -162,8 +162,7 @@ namespace SimpleClient
 
                 foreach (var c in names)
                 {
-                    if (cbClients.Items.Contains(c)) cbClients.Items.Remove(c);
-                    else
+                    if (!cbClients.Items.Contains(c))
                     {
                         cbClients.Items.Add(c);
                     }

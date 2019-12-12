@@ -15,7 +15,7 @@ namespace SimpleClient
 {
     public class SimpleClient
     {
-        private readonly TcpClient tcpClient = new TcpClient();
+        private TcpClient tcpClient = new TcpClient();
         private NetworkStream stream;
         private BinaryWriter writer;
         private BinaryReader reader;
@@ -37,6 +37,7 @@ namespace SimpleClient
 
             try
             {
+                tcpClient = new TcpClient();
                 tcpClient.Connect(hostname, port);
 
                 stream = tcpClient.GetStream();
