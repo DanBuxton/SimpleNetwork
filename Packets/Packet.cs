@@ -14,7 +14,8 @@ namespace Packets
         NICKNAME,
         DIRECTMESSAGE,
         CHATMESSAGE,
-        CLIENTLIST
+        CLIENTLIST,
+        IMAGE
     }
 
     [Serializable]
@@ -78,6 +79,20 @@ namespace Packets
         public DirectMessagePacket(string msg, string to, string from) : this(msg, to)
         {
             From = from;
+        }
+    }
+
+    [Serializable]
+    public class SendImagePacket : Packet
+    {
+        public byte[] Image { get; set; }
+        public int Length { get; set; }
+
+        public SendImagePacket(byte[] image, int length)
+        {
+            Image = image;
+            Length = length;
+            Type = PacketType.IMAGE;
         }
     }
 }

@@ -4,8 +4,10 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -40,6 +42,9 @@ namespace SimpleClient
             btnNickname.Enabled = false;
             btnRefreshList.Enabled = false;
 
+            btnUploadImage.Enabled = false;
+            btnReset.Enabled = false;
+
             FormClosed += (s, e) =>
             {
                 client.Stop();
@@ -65,6 +70,9 @@ namespace SimpleClient
                     btnDisconnect.Enabled = true;
                     btnMessagePerson.Enabled = true;
                     btnRefreshList.Enabled = true;
+
+                    btnUploadImage.Enabled = true;
+                    btnReset.Enabled = true;
                 }
             };
             btnDisconnect.Click += (s, e) =>
@@ -79,6 +87,8 @@ namespace SimpleClient
                 btnNickname.Enabled = false;
                 btnRefreshList.Enabled = false;
 
+                btnUploadImage.Enabled = false;
+                btnReset.Enabled = false;
             };
 
             btnSubmit.Click += (s, e) =>
@@ -115,8 +125,10 @@ namespace SimpleClient
                 }
                 Visible = true;
             };
-
-            //btnRefreshList.Click += (s, e) => client.Stop();
+            btnRefreshList.Click += (s, e) =>
+            {
+                //picImage.Dispose();
+            };
 
             btnMessagePerson.Click += (s, e) =>
             {
@@ -126,13 +138,25 @@ namespace SimpleClient
                 }
             };
 
-            btnRefreshList.Click += (s, e) =>
+            btnUploadImage.Click += (s, e) =>
             {
+                Thread t = new Thread(new ThreadStart(()=>
+                {
+                    if (oFD.ShowDialog(this) == DialogResult.OK)
+                    {
+                        using (System.IO.Stream file = oFD.OpenFile())
+                        {
+                            byte[] imageBinary = new byte[file.Length];
+                            file.Read(imageBinary, 0, (int)file.Length);
 
+                            picImage.Image = new Bitmap(file);
+
+                            file.Close();
+                        }
+                    }
+                }));
+                t.Start();
             };
-
-            //https://docs.microsoft.com/en-us/dotnet/api/system.windows.forms.picturebox?view=netframework-4.8
-            //https://docs.microsoft.com/en-us/dotnet/api/system.windows.forms.control.location?view=netframework-4.8
         }
 
         public void UpdateChatWindow(string message)

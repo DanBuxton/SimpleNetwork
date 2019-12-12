@@ -92,7 +92,7 @@ namespace SimpleServer
 
                 Send(new ChatMessagePacket("Welcome"), c);
 
-                SendToEveryoneBut(new ChatMessagePacket(string.Format("{0} Connected", GetNickname(c))), c);
+                //SendToEveryoneBut(new ChatMessagePacket(string.Format("{0} Connected", GetNickname(c))), c);
 
                 while ((noOfIncomingBytes = c.Reader.ReadInt32()) != 0)
                 {
@@ -156,15 +156,16 @@ namespace SimpleServer
 
         private void SendClientList()
         {
-            foreach (Client cl in Clients)
-            {
-                var namesNew = new List<string>(Nicknames);
-                if (namesNew.Remove(cl.Nickname))
+            if (Nicknames.Count > 1)
+                foreach (Client cl in Clients)
                 {
-                    Send(new ClientListPacket(namesNew), cl);
-                    Console.WriteLine("Client List sent to: " + cl.Nickname);
+                    var namesNew = new List<string>(Nicknames);
+                    if (namesNew.Remove(cl.Nickname))
+                    {
+                        Send(new ClientListPacket(namesNew), cl);
+                        Console.WriteLine("Client List sent to: " + cl.Nickname);
+                    }
                 }
-            }
         }
 
         public string GetNickname(Client c)

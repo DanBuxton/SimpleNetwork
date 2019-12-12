@@ -76,6 +76,7 @@ namespace SimpleClient
         public void SendMessage(string message) => Send(new ChatMessagePacket(message));
         public void SendDirectMessage(string to, string msg) => Send(new DirectMessagePacket(msg, to));
         public void SendNickname(string name) => Send(new NicknamePacket(name));
+        public void SendImage(string name) => Send(new NicknamePacket(name));
 
         public void Stop()
         {

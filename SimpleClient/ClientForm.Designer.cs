@@ -39,6 +39,8 @@
             this.btnRefreshList = new System.Windows.Forms.Button();
             this.btnReset = new System.Windows.Forms.Button();
             this.picImage = new System.Windows.Forms.PictureBox();
+            this.oFD = new System.Windows.Forms.OpenFileDialog();
+            this.btnUploadImage = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.picImage)).BeginInit();
             this.SuspendLayout();
             // 
@@ -122,7 +124,7 @@
             // 
             // btnReset
             // 
-            this.btnReset.Location = new System.Drawing.Point(565, 346);
+            this.btnReset.Location = new System.Drawing.Point(593, 346);
             this.btnReset.Name = "btnReset";
             this.btnReset.Size = new System.Drawing.Size(75, 23);
             this.btnReset.TabIndex = 10;
@@ -131,17 +133,28 @@
             // 
             // picImage
             // 
-            this.picImage.Location = new System.Drawing.Point(522, 143);
+            this.picImage.Location = new System.Drawing.Point(551, 161);
             this.picImage.Name = "picImage";
-            this.picImage.Size = new System.Drawing.Size(100, 100);
+            this.picImage.Size = new System.Drawing.Size(50, 50);
+            this.picImage.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.picImage.TabIndex = 11;
             this.picImage.TabStop = false;
+            // 
+            // btnUploadImage
+            // 
+            this.btnUploadImage.Location = new System.Drawing.Point(484, 346);
+            this.btnUploadImage.Name = "btnUploadImage";
+            this.btnUploadImage.Size = new System.Drawing.Size(103, 23);
+            this.btnUploadImage.TabIndex = 12;
+            this.btnUploadImage.Text = "Upload Image";
+            this.btnUploadImage.UseVisualStyleBackColor = true;
             // 
             // ClientForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(769, 381);
+            this.Controls.Add(this.btnUploadImage);
             this.Controls.Add(this.picImage);
             this.Controls.Add(this.btnReset);
             this.Controls.Add(this.btnRefreshList);
@@ -173,5 +186,7 @@
         private System.Windows.Forms.Button btnRefreshList;
         private System.Windows.Forms.Button btnReset;
         private System.Windows.Forms.PictureBox picImage;
+        private System.Windows.Forms.OpenFileDialog oFD;
+        private System.Windows.Forms.Button btnUploadImage;
     }
 }
