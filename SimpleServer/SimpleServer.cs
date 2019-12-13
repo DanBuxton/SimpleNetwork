@@ -34,17 +34,17 @@ namespace SimpleServer
             {
                 Socket socket = TCPListener.AcceptSocket();
 
-                Thread t = new Thread(new ParameterizedThreadStart(ClientMethod));
+                Thread t = new Thread(new ParameterizedThreadStart(TCPClientMethod));
                 t.Start(new Client(socket));
             }
         }
 
-        public void Stop()
+        public void TCPStop()
         {
             TCPListener.Stop();
         }
 
-        public void Send(Packet data, Client to = null)
+        public void TCPSend(Packet data, Client to = null)
         {
             if (to == null)
                 Clients.ForEach((c) =>
@@ -53,9 +53,9 @@ namespace SimpleServer
                     c.Bf.Serialize(c.Ms, data);
                     byte[] buffer = c.Ms.GetBuffer();
 
-                    c.Writer.Write(buffer.Length);
-                    c.Writer.Write(buffer);
-                    c.Writer.Flush();
+                    c.TCPWriter.Write(buffer.Length);
+                    c.TCPWriter.Write(buffer);
+                    c.TCPWriter.Flush();
                 });
             else
             {
@@ -63,22 +63,22 @@ namespace SimpleServer
                 to.Bf.Serialize(to.Ms, data);
                 byte[] buffer = to.Ms.GetBuffer();
 
-                to.Writer.Write(buffer.Length);
-                to.Writer.Write(buffer);
-                to.Writer.Flush();
+                to.TCPWriter.Write(buffer.Length);
+                to.TCPWriter.Write(buffer);
+                to.TCPWriter.Flush();
             }
         }
 
-        private void SendToEveryoneBut(Packet data, Client c)
+        private void TCPSendToEveryoneBut(Packet data, Client c)
         {
             foreach (var cl in Clients)
             {
                 if (c == cl) continue;
-                Send(data, cl);
+                TCPSend(data, cl);
             }
         }
 
-        private void ClientMethod(object obj)
+        private void TCPClientMethod(object obj)
         {
             Client c = (Client)obj;
 
@@ -90,13 +90,13 @@ namespace SimpleServer
             {
                 int noOfIncomingBytes;
 
-                Send(new ChatMessagePacket("Welcome"), c);
+                TCPSend(new ChatMessagePacket("Welcome"), c);
 
-                //SendToEveryoneBut(new ChatMessagePacket(string.Format("{0} Connected", GetNickname(c))), c);
+                //TCPSendToEveryoneBut(new ChatMessagePacket(string.Format("{0} Connected", GetNickname(c))), c);
 
-                while ((noOfIncomingBytes = c.Reader.ReadInt32()) != 0)
+                while ((noOfIncomingBytes = c.TCPReader.ReadInt32()) != 0)
                 {
-                    ProcessResponse(c.Bf.Deserialize(new MemoryStream(c.Reader.ReadBytes(noOfIncomingBytes))) as Packet, c);
+                    TCPProcessResponse(c.Bf.Deserialize(new MemoryStream(c.TCPReader.ReadBytes(noOfIncomingBytes))) as Packet, c);
                 }
             }
             catch (Exception) { }
@@ -106,16 +106,16 @@ namespace SimpleServer
 
                 Console.WriteLine("Client Disconnected");
 
-                Send(new ChatMessagePacket(string.Format("{0} Disconnected", GetNickname(c))));
+                TCPSend(new ChatMessagePacket(string.Format("{0} Disconnected", GetNickname(c))));
 
                 Nicknames.Remove(GetNickname(c));
-                SendClientList();
+                TCPSendClientList();
 
                 c.Close();
             }
         }
 
-        private void ProcessResponse(Packet data, Client c)
+        private void TCPProcessResponse(Packet data, Client c)
         {
             string msg;
 
@@ -127,7 +127,7 @@ namespace SimpleServer
                     c.Nickname = (data as NicknamePacket).Name;
                     Nicknames.Add(c.Nickname);
                     Console.WriteLine("Nickname set: {0}", c.Nickname);
-                    SendClientList();
+                    TCPSendClientList();
                     break;
                 case PacketType.DIRECTMESSAGE:
                     // To specific person
@@ -140,13 +140,13 @@ namespace SimpleServer
                     }
                     Console.WriteLine("Private message: {0} -> {1}", GetNickname(c), GetNickname(client));
 
-                    Send(data, client);
+                    TCPSend(data, client);
                     break;
                 case PacketType.CHATMESSAGE:
                     msg = GetNickname(c) + ": " + (data as ChatMessagePacket).Message;
                     Console.WriteLine(msg);
 
-                    Send(new ChatMessagePacket(msg));
+                    TCPSend(new ChatMessagePacket(msg));
                     break;
                 case PacketType.CLIENTLIST:
                 default:
@@ -154,7 +154,7 @@ namespace SimpleServer
             }
         }
 
-        private void SendClientList()
+        private void UDPSendClientList()
         {
             if (Nicknames.Count > 1)
                 foreach (Client cl in Clients)
@@ -162,13 +162,13 @@ namespace SimpleServer
                     var namesNew = new List<string>(Nicknames);
                     if (namesNew.Remove(cl.Nickname))
                     {
-                        Send(new ClientListPacket(namesNew), cl);
+                        TCPSend(new ClientListPacket(namesNew), cl);
                         Console.WriteLine("Client List sent to: " + cl.Nickname);
                     }
                 }
         }
 
-        public string GetNickname(Client c)
+        private string GetNickname(Client c)
         {
             return c.Nickname != string.Empty ? c.Nickname : c.GetHashCode().ToString();
         }

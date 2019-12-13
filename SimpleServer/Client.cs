@@ -1,7 +1,9 @@
-﻿using System;
+﻿using Packets;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Sockets;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
@@ -11,10 +13,12 @@ namespace SimpleServer
 {
     class Client
     {
-        private Socket Socket { get; set; }
-        private NetworkStream Stream { get; set; }
-        public BinaryReader Reader { get; private set; }
-        public BinaryWriter Writer { get; private set; }
+        private Socket TCPSocket { get; set; }
+        private NetworkStream TCPStream { get; set; }
+        public BinaryReader TCPReader { get; private set; }
+        public BinaryWriter TCPWriter { get; private set; }
+
+        private Socket UDPSocket { get; set; }
 
         public MemoryStream Ms { get; set; } = new MemoryStream();
         public BinaryFormatter Bf { get; private set; } = new BinaryFormatter();
@@ -25,17 +29,28 @@ namespace SimpleServer
         {
             Console.Title = "Server";
 
-            Socket = socket;
+            TCPSocket = socket;
+            UDPSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
 
-            Stream = new NetworkStream(socket, true);
+            TCPStream = new NetworkStream(socket, true);
 
-            Reader = new BinaryReader(Stream, Encoding.UTF8);
-            Writer = new BinaryWriter(Stream, Encoding.UTF8);
+            TCPReader = new BinaryReader(TCPStream, Encoding.UTF8);
+            TCPWriter = new BinaryWriter(TCPStream, Encoding.UTF8);
+        }
+
+        public void UDPConnect(EndPoint clientConnection)
+        {
+            UDPSocket.Connect(clientConnection);
+        }
+
+        public void UDPSend(Packet packet)
+        {
+
         }
 
         public void Close()
         {
-            Socket.Close();
+            TCPSocket.Close();
         }
     }
 }

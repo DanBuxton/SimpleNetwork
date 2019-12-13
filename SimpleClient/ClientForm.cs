@@ -47,12 +47,12 @@ namespace SimpleClient
 
             FormClosed += (s, e) =>
             {
-                client.Stop();
+                client.TCPStop();
             };
             // Connect to server
             btnConnect.Click += (s, e) =>
             {
-                if (client.Connect("127.0.0.1", 4444))
+                if (client.TCPConnect("127.0.0.1", 4444))
                 {
                     client.Run();
                     updateChatWindowDelegate = new UpdateChatWindowDelegate(UpdateChatWindow);
@@ -61,7 +61,7 @@ namespace SimpleClient
                     Visible = false;
                     if (nicknameForm.ShowDialog() == DialogResult.OK)
                     {
-                        client.SendNickname(nicknameForm.Name);
+                        client.TCPSendNickname(nicknameForm.Name);
                         btnNickname.Enabled = !btnNickname.Enabled;
                     }
                     Visible = true;
@@ -77,7 +77,7 @@ namespace SimpleClient
             };
             btnDisconnect.Click += (s, e) =>
             {
-                client.Stop();
+                client.TCPStop();
 
                 cbClients.Items.Clear();
 
@@ -101,30 +101,30 @@ namespace SimpleClient
                     //client.SendDirectMessage(message.Remove(0, 1).Remove(space, message.Length - 1), message);
                     var name = cbClients.SelectedItem as string;
                     string msg = message.Remove(0, ++space);
-                    client.SendDirectMessage(name, msg);
+                    client.TCPSendDirectMessage(name, msg);
 
                     updateChatWindowDelegate = new UpdateChatWindowDelegate(UpdateChatWindow);
                 }
                 else if (message.ToLower() != "exit") // Normal message
                 {
-                    client.SendMessage(message);
+                    client.TCPSendMessage(message);
                     txtInputMessage.Clear();
 
                     updateChatWindowDelegate = new UpdateChatWindowDelegate(UpdateChatWindow);
                 }
-                else client.Stop(); // Exit
+                else client.TCPStop(); // Exit
             };
 
-            btnNickname.Click += (s, e) =>
-            {
-                Visible = false;
-                if (nicknameForm.ShowDialog() == DialogResult.OK)
-                {
-                    client.SendNickname(nicknameForm.Name);
-                    btnNickname.Enabled = false;
-                }
-                Visible = true;
-            };
+            //btnNickname.Click += (s, e) =>
+            //{
+            //    Visible = false;
+            //    if (nicknameForm.ShowDialog() == DialogResult.OK)
+            //    {
+            //        client.TCPSendNickname(nicknameForm.Name);
+            //        btnNickname.Enabled = false;
+            //    }
+            //    Visible = true;
+            //};
             btnRefreshList.Click += (s, e) =>
             {
                 //picImage.Dispose();

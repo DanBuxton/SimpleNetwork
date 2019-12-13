@@ -15,13 +15,19 @@ namespace SimpleClient
 {
     public class SimpleClient
     {
-        private TcpClient tcpClient = new TcpClient();
-        private NetworkStream stream;
-        private BinaryWriter writer;
-        private BinaryReader reader;
+        private TcpClient tcpClient;
+        private NetworkStream tcpStream;
+        private BinaryWriter tpcWriter;
+        private BinaryReader tcpReader;
+        private Thread tcpReaderThread;
+
+        public UdpClient udpClient;
+        private NetworkStream udpStream;
+        private BinaryWriter udpWriter;
+        private BinaryReader udpReader;
+
         private MemoryStream ms = new MemoryStream();
         private readonly BinaryFormatter bf = new BinaryFormatter();
-        private Thread readerThread;
         private readonly ClientForm messageForm;
 
         public SimpleClient()
@@ -31,7 +37,7 @@ namespace SimpleClient
             Application.Run(messageForm);
         }
 
-        public bool Connect(string hostname, int port)
+        public bool TCPConnect(string hostname, int port)
         {
             bool result = true;
 
@@ -39,11 +45,9 @@ namespace SimpleClient
             {
                 tcpClient = new TcpClient();
                 tcpClient.Connect(hostname, port);
-
-                stream = tcpClient.GetStream();
-
-                writer = new BinaryWriter(stream, Encoding.UTF8);
-                reader = new BinaryReader(stream, Encoding.UTF8);
+                tcpStream = tcpClient.GetStream();
+                tpcWriter = new BinaryWriter(tcpStream, Encoding.UTF8);
+                tcpReader = new BinaryReader(tcpStream, Encoding.UTF8);
             }
             catch (Exception e)
             {
@@ -52,50 +56,53 @@ namespace SimpleClient
                 result = false;
             }
 
-            readerThread = new Thread(new ThreadStart(ProcessServerResponse));
+            tcpReaderThread = new Thread(new ThreadStart(TCPProcessServerResponse));
 
             return result;
         }
 
         public void Run()
         {
-            readerThread.Start();
+            tcpReaderThread.Start();
         }
 
-        public void Send(Packet data)
+        public void TCPSend(Packet data)
         {
             ms = new MemoryStream();
             bf.Serialize(ms, data);
             byte[] buffer = ms.GetBuffer();
 
-            writer.Write(buffer.Length);
-            writer.Write(buffer);
-            writer.Flush();
+            tpcWriter.Write(buffer.Length);
+            tpcWriter.Write(buffer);
+            tpcWriter.Flush();
         }
 
-        public void SendMessage(string message) => Send(new ChatMessagePacket(message));
-        public void SendDirectMessage(string to, string msg) => Send(new DirectMessagePacket(msg, to));
-        public void SendNickname(string name) => Send(new NicknamePacket(name));
-        public void SendImage(string name) => Send(new NicknamePacket(name));
+        public void TCPSendMessage(string message) => TCPSend(new ChatMessagePacket(message));
+        public void TCPSendDirectMessage(string to, string msg) => TCPSend(new DirectMessagePacket(msg, to));
+        public void TCPSendNickname(string name) => TCPSend(new NicknamePacket(name));
+        public void TCPSendImage(byte[] img) => TCPSend(new ImagePacket(img));
+        public void TCPSendImagePosition(int x, int y) => TCPSend(new NicknamePacket(""));
 
-        public void Stop()
+        public void UDPSendImagePositionUpdate(int x, int y) => TCPSend(new NicknamePacket(""));
+
+        public void TCPStop()
         {
             try
             {
-                readerThread.Abort();
+                tcpReaderThread.Abort();
             }
             catch (Exception) { }
 
             tcpClient.Close();
         }
 
-        public void ProcessServerResponse()
+        public void TCPProcessServerResponse()
         {
             while (true)
             {
                 string msg = string.Empty;
 
-                ms = new MemoryStream(reader.ReadBytes(reader.ReadInt32()));
+                ms = new MemoryStream(tcpReader.ReadBytes(tcpReader.ReadInt32()));
                 Packet p = bf.Deserialize(ms) as Packet;
                 switch (p.Type)
                 {

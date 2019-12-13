@@ -15,7 +15,8 @@ namespace Packets
         DIRECTMESSAGE,
         CHATMESSAGE,
         CLIENTLIST,
-        IMAGE
+        IMAGE,
+        LOGIN
     }
 
     [Serializable]
@@ -83,16 +84,26 @@ namespace Packets
     }
 
     [Serializable]
-    public class SendImagePacket : Packet
+    public class ImagePacket : Packet
     {
         public byte[] Image { get; set; }
-        public int Length { get; set; }
 
-        public SendImagePacket(byte[] image, int length)
+        public ImagePacket(byte[] image)
         {
             Image = image;
-            Length = length;
             Type = PacketType.IMAGE;
+        }
+    }
+
+    [Serializable]
+    public class LoginPacket : Packet
+    {
+        public EndPoint EndPoint { get; set; }
+
+        public LoginPacket(EndPoint endPoint)
+        {
+            EndPoint = endPoint;
+            Type = PacketType.LOGIN;
         }
     }
 }
