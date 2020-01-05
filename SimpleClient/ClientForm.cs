@@ -19,9 +19,15 @@ namespace SimpleClient
 
         delegate void UpdateChatWindowDelegate(string message);
         delegate void UpdateClientListDelegate(List<string> names);
+        delegate void UpdateWindowDelegate(bool error);
+        delegate void UpdateImageDelegate(Bitmap img);
+        delegate void UpdateImageLocationDelegate(int x, int y);
 
         private UpdateChatWindowDelegate updateChatWindowDelegate;
         private UpdateClientListDelegate updateClientListDelegate;
+        private UpdateWindowDelegate updateWindowDelegate;
+        private UpdateImageDelegate updateImageDelegate;
+        private UpdateImageLocationDelegate updateImageLocationDelegate;
 
         private readonly SimpleClient client;
 
@@ -39,54 +45,60 @@ namespace SimpleClient
 
             btnDisconnect.Enabled = false;
             btnMessagePerson.Enabled = false;
-            btnNickname.Enabled = false;
-            btnRefreshList.Enabled = false;
 
+            btnSubmit.Enabled = false;
             btnUploadImage.Enabled = false;
             btnReset.Enabled = false;
 
+            updateWindowDelegate = new UpdateWindowDelegate(UpdateWindow);
+
             FormClosed += (s, e) =>
             {
-                client.TCPStop();
+                client.Stop();
             };
             // Connect to server
             btnConnect.Click += (s, e) =>
             {
-                if (client.TCPConnect("127.0.0.1", 4444))
+                if (client.Connect("127.0.0.1", 25565))
                 {
                     client.Run();
                     updateChatWindowDelegate = new UpdateChatWindowDelegate(UpdateChatWindow);
                     updateClientListDelegate = new UpdateClientListDelegate(UpdateClientList);
+                    updateImageDelegate = new UpdateImageDelegate(UpdateImage);
+                    updateImageLocationDelegate = new UpdateImageLocationDelegate(UpdateImageLocation);
 
                     Visible = false;
                     if (nicknameForm.ShowDialog() == DialogResult.OK)
                     {
                         client.TCPSendNickname(nicknameForm.Name);
-                        btnNickname.Enabled = !btnNickname.Enabled;
                     }
                     Visible = true;
 
                     btnConnect.Enabled = false;
                     btnDisconnect.Enabled = true;
                     btnMessagePerson.Enabled = true;
-                    btnRefreshList.Enabled = true;
 
+                    btnSubmit.Enabled = true;
                     btnUploadImage.Enabled = true;
                     btnReset.Enabled = true;
+                }
+                else
+                {
+                    //txtMessageDisplay.Text += $"Can\'t connect";
+                    UpdateChatWindow($"Can\'t Connect\n");
                 }
             };
             btnDisconnect.Click += (s, e) =>
             {
-                client.TCPStop();
+                client.Stop();
 
                 cbClients.Items.Clear();
 
                 btnConnect.Enabled = true;
                 btnDisconnect.Enabled = false;
                 btnMessagePerson.Enabled = false;
-                btnNickname.Enabled = false;
-                btnRefreshList.Enabled = false;
 
+                btnSubmit.Enabled = false;
                 btnUploadImage.Enabled = false;
                 btnReset.Enabled = false;
             };
@@ -102,6 +114,7 @@ namespace SimpleClient
                     var name = cbClients.SelectedItem as string;
                     string msg = message.Remove(0, ++space);
                     client.TCPSendDirectMessage(name, msg);
+                    txtInputMessage.Clear();
 
                     updateChatWindowDelegate = new UpdateChatWindowDelegate(UpdateChatWindow);
                 }
@@ -112,22 +125,7 @@ namespace SimpleClient
 
                     updateChatWindowDelegate = new UpdateChatWindowDelegate(UpdateChatWindow);
                 }
-                else client.TCPStop(); // Exit
-            };
-
-            //btnNickname.Click += (s, e) =>
-            //{
-            //    Visible = false;
-            //    if (nicknameForm.ShowDialog() == DialogResult.OK)
-            //    {
-            //        client.TCPSendNickname(nicknameForm.Name);
-            //        btnNickname.Enabled = false;
-            //    }
-            //    Visible = true;
-            //};
-            btnRefreshList.Click += (s, e) =>
-            {
-                //picImage.Dispose();
+                else client.Stop(); // Exit
             };
 
             btnMessagePerson.Click += (s, e) =>
@@ -137,25 +135,33 @@ namespace SimpleClient
                     txtInputMessage.Text = $"@{cbClients.SelectedItem as string} ";
                 }
             };
-
             btnUploadImage.Click += (s, e) =>
             {
-                Thread t = new Thread(new ThreadStart(()=>
+                new Thread(new ThreadStart(() =>
                 {
-                    if (oFD.ShowDialog(this) == DialogResult.OK)
+                    var oF = new OpenFileDialog();
+                    if (oF.ShowDialog(this) == DialogResult.OK)
                     {
-                        using (System.IO.Stream file = oFD.OpenFile())
+                        using (Stream file = oF.OpenFile())
                         {
                             byte[] imageBinary = new byte[file.Length];
                             file.Read(imageBinary, 0, (int)file.Length);
 
-                            picImage.Image = new Bitmap(file);
-
+                            Bitmap img = new Bitmap(file);
+                            client.TCPSendImage(img, oF.FileName.Split(new char[] { '\\' }).Last());
                             file.Close();
+
                         }
                     }
-                }));
-                t.Start();
+                })).Start();
+            };
+
+            pnlImg.MouseClick += (s, e) =>
+            {
+                base.OnMouseClick(e);
+
+                if (picImage.Image != null)
+                    client.TCPSendImagePositionUpdate(e.X, e.Y);
             };
         }
 
@@ -189,6 +195,95 @@ namespace SimpleClient
                     if (!cbClients.Items.Contains(c))
                     {
                         cbClients.Items.Add(c);
+                    }
+                }
+            }
+        }
+
+        public void UpdateWindow(bool error)
+        {
+            if (!InvokeRequired)
+            {
+                if (error)
+                {
+                    btnConnect.Enabled = true;
+                    btnDisconnect.Enabled = false;
+                    btnMessagePerson.Enabled = false;
+
+                    btnSubmit.Enabled = false;
+                    btnUploadImage.Enabled = false;
+                    btnReset.Enabled = false;
+                }
+                else
+                {
+                    btnConnect.Enabled = false;
+                    btnDisconnect.Enabled = true;
+                    btnMessagePerson.Enabled = true;
+
+                    btnSubmit.Enabled = true;
+                    btnUploadImage.Enabled = true;
+                    btnReset.Enabled = true;
+                }
+            }
+            else
+            {
+                Invoke(updateWindowDelegate, error);
+            }
+        }
+
+        public void UpdateImage(Bitmap img)
+        {
+            if (picImage.InvokeRequired)
+            {
+                picImage.Invoke(updateImageDelegate, img);
+            }
+            else
+            {
+                picImage.Image = img;
+            }
+        }
+
+        public void UpdateImageLocation(int x, int y)
+        {
+            if (picImage.InvokeRequired)
+            {
+                picImage.Invoke(updateImageLocationDelegate, x, y);
+            }
+            else
+            {
+                if (picImage.Image != null)
+                {
+                    int newX = x; // Destination of the x coordinate
+                    int newY = y; // Destination of the y coordinate
+
+                    bool HasArrived = false; // Flag to check that if it has arrived to the destination
+
+                    while (HasArrived == false)
+                    {
+                        // Execute code to add or subtract from values to get closer to destX and destY
+                        if (newX > picImage.Left)
+                        {
+                            picImage.Left += 1;
+                        }
+                        else if (newX < picImage.Left)
+                        {
+                            picImage.Left -= 1;
+                        }
+
+                        if (newY > picImage.Top)
+                        {
+                            picImage.Top += 1;
+                        }
+                        else if (newY < picImage.Top)
+                        {
+                            picImage.Top -= 1;
+                        }
+
+                        // Check if the picture box has arrived if so then change flag to true to end loop
+                        if (picImage.Left == newX && picImage.Top == newY)
+                        {
+                            HasArrived = true;
+                        }
                     }
                 }
             }

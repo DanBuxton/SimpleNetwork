@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -16,6 +17,8 @@ namespace Packets
         CHATMESSAGE,
         CLIENTLIST,
         IMAGE,
+        IMAGEPOS,
+        //NEWIMAGEPOS,
         LOGIN
     }
 
@@ -84,18 +87,6 @@ namespace Packets
     }
 
     [Serializable]
-    public class ImagePacket : Packet
-    {
-        public byte[] Image { get; set; }
-
-        public ImagePacket(byte[] image)
-        {
-            Image = image;
-            Type = PacketType.IMAGE;
-        }
-    }
-
-    [Serializable]
     public class LoginPacket : Packet
     {
         public EndPoint EndPoint { get; set; }
@@ -106,4 +97,46 @@ namespace Packets
             Type = PacketType.LOGIN;
         }
     }
+
+    [Serializable]
+    public class ImagePacket : Packet
+    {
+        //public byte[] Image { get; set; }
+        public Bitmap Image { get; set; }
+        public string FileName { get; set; }
+
+        public ImagePacket(Bitmap image)
+        {
+            Image = image;
+            Type = PacketType.IMAGE;
+        }
+        public ImagePacket(Bitmap image, string fileName)
+        {
+            Image = image;
+            FileName = fileName;
+            Type = PacketType.IMAGE;
+        }
+    }
+
+    [Serializable]
+    public class ImagePositionUpdatePacket : Packet
+    {
+        public int X { get; set; }
+        public int Y { get; set; }
+
+        public ImagePositionUpdatePacket(int x, int y)
+        {
+            X = x;
+            Y = y;
+            Type = PacketType.IMAGEPOS;
+        }
+    }
+    //[Serializable]
+    //public class NewImagePositionPacket : ImagePositionUpdatePacket
+    //{
+    //    public NewImagePositionPacket(int x, int y) : base(x, y)
+    //    {
+    //        Type = PacketType.NEWIMAGEPOS;
+    //    }
+    //}
 }
