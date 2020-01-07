@@ -123,11 +123,14 @@ namespace Packets
     {
         public int X { get; set; }
         public int Y { get; set; }
+        public bool IsLogOnly { get; set; }
 
-        public ImagePositionUpdatePacket(int x, int y)
+        public ImagePositionUpdatePacket(int x, int y, bool isLogOnly = false)
         {
             X = x;
             Y = y;
+            IsLogOnly = isLogOnly;
+
             Type = PacketType.IMAGEPOS;
         }
     }

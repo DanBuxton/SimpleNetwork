@@ -97,6 +97,7 @@ namespace SimpleClient
         public void TCPSendImage(Bitmap img, string fileName) => TCPSend(new ImagePacket(img, fileName));
         //public void TCPSendImagePosition(int x, int y) => TCPSend(new ImagePositionPacket(x, y));
         public void TCPSendImagePositionUpdate(int x, int y) => TCPSend(new ImagePositionUpdatePacket(x, y));
+        public void TCPSendImagePositionUpdateLog(int x, int y) => TCPSend(new ImagePositionUpdatePacket(x, y, true));
         //public void UDPSendImagePositionUpdate(int x, int y) => UDPSend(new NewImagePositionPacket(x, y));
 
         public void Stop()
@@ -128,7 +129,7 @@ namespace SimpleClient
                         case PacketType.DIRECTMESSAGE:
                             var pack = p as DirectMessagePacket;
                             msg = pack.Message;
-                            msg = msg.Insert(0, "Private Message From: " + pack.From + "\n\t");
+                            msg = msg.Insert(0, "(Private) " + pack.From + ": ");
                             break;
                         case PacketType.CHATMESSAGE:
                             msg = ((ChatMessagePacket)p).Message;

@@ -22,12 +22,16 @@ namespace SimpleClient
         delegate void UpdateWindowDelegate(bool error);
         delegate void UpdateImageDelegate(Bitmap img);
         delegate void UpdateImageLocationDelegate(int x, int y);
+        delegate void UpdateImageLocationLogDelegate(int x, int y);
 
         private UpdateChatWindowDelegate updateChatWindowDelegate;
         private UpdateClientListDelegate updateClientListDelegate;
         private UpdateWindowDelegate updateWindowDelegate;
         private UpdateImageDelegate updateImageDelegate;
         private UpdateImageLocationDelegate updateImageLocationDelegate;
+        private UpdateImageLocationLogDelegate updateImageLocationLogDelegate;
+
+        private Thread imageUpdateThread;
 
         private readonly SimpleClient client;
 
@@ -135,6 +139,7 @@ namespace SimpleClient
                     txtInputMessage.Text = $"@{cbClients.SelectedItem as string} ";
                 }
             };
+
             btnUploadImage.Click += (s, e) =>
             {
                 new Thread(new ThreadStart(() =>
@@ -161,7 +166,11 @@ namespace SimpleClient
                 base.OnMouseClick(e);
 
                 if (picImage.Image != null)
+                {
                     client.TCPSendImagePositionUpdate(e.X, e.Y);
+
+                    //updateImageLocationDelegate.Invoke(e.X, e.Y);
+                }
             };
         }
 
@@ -247,44 +256,56 @@ namespace SimpleClient
         {
             if (picImage.InvokeRequired)
             {
-                picImage.Invoke(updateImageLocationDelegate, x, y);
+                pnlImg.Invoke(updateImageLocationDelegate, x, y);
             }
             else
             {
                 if (picImage.Image != null)
                 {
-                    int newX = x; // Destination of the x coordinate
-                    int newY = y; // Destination of the y coordinate
+                    if (imageUpdateThread != null && imageUpdateThread.IsAlive)
+                        imageUpdateThread.Abort();
 
-                    bool HasArrived = false; // Flag to check that if it has arrived to the destination
-
-                    while (HasArrived == false)
+                    imageUpdateThread = new Thread(new ThreadStart(() =>
                     {
-                        // Execute code to add or subtract from values to get closer to destX and destY
-                        if (newX > picImage.Left)
-                        {
-                            picImage.Left += 1;
-                        }
-                        else if (newX < picImage.Left)
-                        {
-                            picImage.Left -= 1;
-                        }
+                        bool HasArrived = false; // Flag to check that if it has arrived to the destination
 
-                        if (newY > picImage.Top)
+                        while (HasArrived == false)
                         {
-                            picImage.Top += 1;
-                        }
-                        else if (newY < picImage.Top)
-                        {
-                            picImage.Top -= 1;
-                        }
+                            // Execute code to add or subtract from values to get closer to destX and destY
+                            if (x > picImage.Left)
+                            {
+                                picImage.Left += 1;
+                            }
+                            else if (x < picImage.Left)
+                            {
+                                picImage.Left -= 1;
+                            }
 
-                        // Check if the picture box has arrived if so then change flag to true to end loop
-                        if (picImage.Left == newX && picImage.Top == newY)
-                        {
-                            HasArrived = true;
+                            if (y > picImage.Top)
+                            {
+                                picImage.Top += 1;
+                            }
+                            else if (y < picImage.Top)
+                            {
+                                picImage.Top -= 1;
+                            }
+
+                            // Check if the picture box has arrived if so then change flag to true to end loop
+                            if (picImage.Left == x && picImage.Top == y)
+                            {
+                                HasArrived = true;
+
+                                imageUpdateThread.Abort();
+                            }
+
+                            Thread.Sleep(25);
+
+                            client.TCPSendImagePositionUpdateLog(picImage.Left, picImage.Top);
                         }
-                    }
+                    }));
+
+                    if (!imageUpdateThread.IsAlive)
+                        imageUpdateThread.Start();
                 }
             }
         }

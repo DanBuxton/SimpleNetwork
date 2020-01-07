@@ -169,15 +169,12 @@ namespace SimpleServer
                     // To specific person
                     var pack = data as DirectMessagePacket;
                     pack.From = GetNickname(c);
+
                     Client to = null;
-                    //foreach (Client c1 in Clients)
-                    //{
-                    //    if (c1.Nickname.Equals(pack.To)) { to = c1; break; }
-                    //}
                     for (int i = 0; i < Clients.Count && to == null; i++)
                     {
                         //Client c1 = Clients[i];
-                        if (Clients[i].Nickname.Equals(pack.To)) to = Clients[i];
+                        if (GetNickname(Clients[i]).Equals(pack.To)) to = Clients[i];
                     }
                     Console.WriteLine("Private message: {0} -> {1}", GetNickname(c), GetNickname(to));
 
@@ -204,9 +201,10 @@ namespace SimpleServer
                     Console.WriteLine("In image pos");
                     Console.WriteLine("x:{0}; y:{1}", (data as ImagePositionUpdatePacket).X, (data as ImagePositionUpdatePacket).Y);
 
-                    Console.WriteLine("New image position received: x: {0}; y: {1);", (data as ImagePositionUpdatePacket).X, (data as ImagePositionUpdatePacket).Y);
+                    //Console.WriteLine("New image position received: x: {0}; y: {1);", (data as ImagePositionUpdatePacket).X, (data as ImagePositionUpdatePacket).Y);
+                    if (!(data as ImagePositionUpdatePacket).IsLogOnly)
+                        TCPSend(data);
 
-                    TCPSend(data);
                     break;
                 case PacketType.LOGIN:
                 case PacketType.EMPTY:
