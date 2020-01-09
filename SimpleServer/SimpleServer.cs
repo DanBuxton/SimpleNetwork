@@ -18,10 +18,10 @@ namespace SimpleServer
         private TcpListener TCPListener { get; set; }
 
         private List<Client> Clients { get; set; } = new List<Client>();
-        protected List<string> Nicknames { get; set; } = new List<string>();
+        private List<string> Nicknames { get; set; } = new List<string>();
 
-        public Bitmap CurrentImage { get; set; } = null;
-        public Point CurrentLocation { get; set; } = Point.Empty;
+        private Bitmap CurrentImage { get; set; } = null;
+        private Point CurrentLocation { get; set; } = Point.Empty;
 
         public SimpleServer(string ipAddress, int port)
         {
@@ -49,7 +49,7 @@ namespace SimpleServer
             TCPListener.Stop();
         }
 
-        public void TCPSend(Packet data, Client to = null)
+        private void TCPSend(Packet data, Client to = null)
         {
             if (to == null)
                 Clients.ForEach((c) =>

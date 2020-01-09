@@ -15,21 +15,19 @@ namespace SimpleClient
 {
     public partial class ClientForm : Form
     {
-        public List<string> ClientNames { get; set; } = new List<string>();
-
+        #region Delegates
         delegate void UpdateChatWindowDelegate(string message);
         delegate void UpdateClientListDelegate(List<string> names);
         delegate void UpdateWindowDelegate(bool error);
         delegate void UpdateImageDelegate(Bitmap img);
         delegate void UpdateImageLocationDelegate(int x, int y);
-        delegate void UpdateImageLocationLogDelegate(int x, int y);
 
         private UpdateChatWindowDelegate updateChatWindowDelegate;
         private UpdateClientListDelegate updateClientListDelegate;
         private UpdateWindowDelegate updateWindowDelegate;
         private UpdateImageDelegate updateImageDelegate;
         private UpdateImageLocationDelegate updateImageLocationDelegate;
-        private UpdateImageLocationLogDelegate updateImageLocationLogDelegate;
+        #endregion
 
         private Thread imageUpdateThread;
 
