@@ -111,14 +111,12 @@ namespace SimpleClient
                 if (string.IsNullOrWhiteSpace(message)) return; // No message
                 else if (message.Contains('@')) // Direct message
                 {
-                    int space = message.IndexOf(' ');
-                    //client.SendDirectMessage(message.Remove(0, 1).Remove(space, message.Length - 1), message);
-                    var name = cbClients.SelectedItem as string;
-                    string msg = message.Remove(0, ++space);
-                    client.TCPSendDirectMessage(name, msg);
+                    client.TCPSendDirectMessage(cbClients.SelectedItem as string, message.Remove(0, message.IndexOf(' ') + 1));
                     txtInputMessage.Clear();
 
                     updateChatWindowDelegate = new UpdateChatWindowDelegate(UpdateChatWindow);
+
+                    //UpdateChatWindow(message.Remove(0, 1));
                 }
                 else if (message.ToLower() != "exit") // Normal message
                 {
